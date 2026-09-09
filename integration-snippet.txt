@@ -1,0 +1,23 @@
+【index.html 接入方式】
+
+1. 在 <body> 前后或现有 <script> 区域加入：
+   <script src="./code-bank-adapter.js"></script>
+
+2. 将原来的：
+   renderCode();
+   改为：
+   renderFormalCode().catch(e => { console.error(e); });
+
+3. 将规范区“回答”按钮：
+   onclick="openCodeAnswer()"
+   改为：
+   onclick="openFormalCodeAnswer()"
+
+4. 删除旧的 codeBank、renderCode、openCodeAnswer、showCode 占位逻辑。
+
+5. 将 data/code-bank.min.json 放入仓库。
+
+6. 更新 sw.js CACHE 名称，例如 zhuxi-v12，并把 ./data/code-bank.min.json、./code-bank-adapter.js 加入 ASSETS，避免 PWA 缓存旧题库。
+
+【结果】
+“今日规范”会从正式题库中按日期选题；先主动回忆，点击“查看参照”后显示答案、原手册规范出处和 PDF 页码，不再显示“正式题库待部署”的占位提示。
