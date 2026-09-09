@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>筑习 - 建筑考研学习系统 v1.2</title>
+    <title>筑习 - 建筑考研学习系统 v1.2.1</title>
     <link rel="manifest" href="./manifest.webmanifest">
     <meta name="theme-color" content="#F2F2F7">
     <link rel="apple-touch-icon" href="./icon-180.png">
@@ -275,7 +275,7 @@
 
 <header>
     <h1>
-        <span>筑习 <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">v1.2</span></span>
+        <span>筑习 <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">v1.2.1</span></span>
         <button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button>
     </h1>
 </header>
@@ -383,8 +383,12 @@
         { id: 2, subject: "建筑理论", chapter: "第二章 空间组合理论", nodes: ["柯布西耶五原则", "路易·康空间"] }
     ];
 
+    // 扩充规范题库，确保“换一题”有多道题目可供随机切换
     const codeBank = [
-        { title: "《建筑设计防火规范》", content: "高层民用建筑防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" }
+        { title: "《建筑设计防火规范》GB 50016", content: "高层民用建筑内防火分区之间的防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" },
+        { title: "《民用建筑设计统一标准》GB 50352", content: "严寒和寒冷地区公共建筑的体形系数应如何控制以满足节能要求？", answer: "应严格控制体形系数，一般不宜大于 0.30。" },
+        { title: "《建筑抗震设计规范》GB 50011", content: "多层砌体房屋抗震墙设置中，横墙间距不宜超过多少米？", answer: "一般不宜大于房宽的 2.5 倍或规范规定限值。" },
+        { title: "《公共建筑节能设计标准》GB 50189", content: "建筑东、西朝向窗墙比不应大于多少？", answer: "不应大于 0.30。" }
     ];
 
     let tasks = getData('tasks', defaultTasks);
@@ -406,7 +410,6 @@
         renderTasksList();
     }
 
-    // 渲染本周 Routine 色块网格
     function renderRoutineGrid() {
         const container = document.getElementById('routineGridContainer');
         const curr = new Date();
@@ -439,7 +442,6 @@
         container.innerHTML = html;
     }
 
-    // 渲染累计月历视图
     function renderMonthGrid() {
         const now = new Date();
         const year = now.getFullYear();
@@ -474,7 +476,6 @@
         document.getElementById('monthGridContainer').innerHTML = html;
     }
 
-    // 点击某一天查看或管理任务
     function openDayDetail(dateStr) {
         const dayTasks = tasks.filter(t => t.date === dateStr);
         document.getElementById('modalTitle').innerText = `📅 日期详情: ${dateStr}`;
@@ -499,7 +500,6 @@
         document.getElementById('taskModal').classList.remove('active');
     }
 
-    // 渲染今日任务
     function renderTasksList() {
         const container = document.getElementById('taskListContainer');
         const todayTasks = tasks.filter(t => t.date === todayStr);
@@ -564,7 +564,6 @@
         renderDashboard();
     }
 
-    // 针对专业课的主动回忆弹窗（政治英语不包含）
     function openRecallModal(id) {
         const t = tasks.find(x => x.id === id);
         if (!t) return;
@@ -595,7 +594,6 @@
         alert('掌握率已更新！');
     }
 
-    // 学科知识树
     function renderSubjectTree() {
         const container = document.getElementById('subjectTreeContainer');
         let html = '';
@@ -621,8 +619,9 @@
         renderSubjectTree();
     }
 
+    // 随机切换建筑规范题
     function loadDailyCodeQuestion() {
-        const q = codeBank[0];
+        const q = codeBank[Math.floor(Math.random() * codeBank.length)];
         document.getElementById('codeQTitle').innerText = q.title;
         document.getElementById('codeQContent').innerText = q.content;
         document.getElementById('codeQAnswer').innerText = '解析: ' + q.answer;
@@ -642,7 +641,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks, subjectTree }, null, 2));
         const a = document.createElement('a');
         a.href = dataStr;
-        a.download = "zhuxi_v1_2_backup.json";
+        a.download = "zhuxi_v1_2_1_backup.json";
         document.body.appendChild(a);
         a.click();
         a.remove();
