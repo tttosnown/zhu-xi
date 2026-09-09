@@ -1,175 +1,659 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f7f5">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="筑习">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
-<title>筑习 · 建筑考研 Routine</title>
-<style>
-:root{--bg:#f6f6f3;--card:#fff;--text:#222;--muted:#777;--line:#e8e8e4;--accent:#222;--ok:#3f7d57;--warn:#a77728;--bad:#a04a4a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Helvetica Neue",sans-serif}
-button,input,select,textarea{font:inherit}button{border:0;background:none;color:inherit}
-.app{max-width:900px;margin:auto;padding:22px 18px 90px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-h1{font-size:25px;margin:0}.date{color:var(--muted);font-size:13px;margin-top:4px}
-.iconbtn{width:42px;height:42px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
-.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 3px 18px rgba(0,0,0,.035)}
-.kicker{font-size:12px;color:var(--muted);margin-bottom:8px}.big{font-size:42px;font-weight:700;letter-spacing:-2px}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}.day{padding:9px 2px;border-radius:12px;text-align:center;font-size:12px;color:var(--muted)}.day.active{background:#222;color:#fff}
-.progress{height:7px;background:#ecece8;border-radius:99px;overflow:hidden;margin-top:10px}.progress>i{display:block;height:100%;background:#333}
-.task{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}
-.check{width:25px;height:25px;border:1.5px solid #bbb;border-radius:8px;flex:0 0 auto}.check.done{background:#222;border-color:#222;color:#fff;text-align:center;line-height:24px}
-.taskmain{flex:1}.tasktitle{font-size:15px}.meta{font-size:12px;color:var(--muted);margin-top:4px}.stars{letter-spacing:1px;font-size:11px}
-.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.pill{padding:9px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}.primary{background:#222;color:#fff}
-.section{margin-top:14px}.empty{color:var(--muted);padding:16px 0}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.32);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:10}.modal.show{display:flex}
-.sheet{width:min(700px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:24px;padding:20px}
-label{display:block;font-size:12px;color:var(--muted);margin:13px 0 6px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fafaf8}textarea{min-height:110px;resize:vertical}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.close{float:right}.q{padding:13px 0;border-bottom:1px solid var(--line)}.q:last-child{border:0}
-.score{font-size:32px;font-weight:700}.small{font-size:12px;color:var(--muted)}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#222;color:#fff;padding:11px 15px;border-radius:14px;display:none;z-index:20}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>筑习 - 建筑考研学习辅助 v12</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#D1C4E9">
+    <link rel="apple-touch-icon" href="./icon-180.png">
+    <script src="./code-bank-adapter.js"></script>
+    <style>
+        :root {
+            --bg-color: #FAF8F5;
+            --card-bg: #FFFFFF;
+            --text-main: #4A4543;
+            --text-sub: #8C827D;
+            --lavender: #D1C4E9;
+            --pink: #F8BBD0;
+            --blue: #B3E5FC;
+            --green: #C8E6C9;
+            --yellow: #FFF9C4;
+            --accent-purple: #9575CD;
+            --shadow: 0 4px 12px rgba(149, 117, 205, 0.08);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--lavender), var(--pink));
+            padding: 24px 20px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: var(--shadow);
+            color: #4A3B5C;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        header p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(209, 196, 233, 0.3);
+        }
+
+        .card h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #5E4DB2;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .week-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .day-node {
+            flex: 1;
+            background: #F5F3F9;
+            border-radius: 10px;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #EAE4F2;
+        }
+        .day-node .d-name {
+            color: var(--text-sub);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .day-node .d-icon {
+            font-size: 14px;
+        }
+        .status-done { color: #4CAF50; font-weight: bold; }
+        .status-todo { color: #FF9800; }
+        .status-none { color: #BDBDBD; }
+
+        .task-item-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: #FFCDD2;
+        }
+        .task-delete-action {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: #E57373;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .task-item {
+            position: relative;
+            background: #FAFAFA;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #EFEBE9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s ease;
+            z-index: 2;
+        }
+        .task-item.completed span.t-title {
+            text-decoration: line-through;
+            color: var(--text-sub);
+        }
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: var(--blue);
+            color: #01579B;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #D7CCC8;
+            background: #FFF;
+            font-size: 14px;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--accent-purple);
+        }
+        .btn {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 2px 6px rgba(149,117,205,0.3);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: #E0E0E0;
+            color: #424242;
+            box-shadow: none;
+        }
+
+        .qb-box {
+            background: #F3E5F5;
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent-purple);
+        }
+        .qb-box p {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        .warning-tip {
+            font-size: 11px;
+            color: #D32F2F;
+            background: #FFEBEE;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        nav.tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #E0D7E8;
+            z-index: 1000;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .tab-item {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-sub);
+            cursor: pointer;
+            flex: 1;
+        }
+        .tab-item.active {
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+        .tab-item span {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .record-card {
+            background: #FAFAFA;
+            border-left: 4px solid #FFB74D;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .record-card.mastered {
+            border-left-color: #81C784;
+            opacity: 0.85;
+        }
+    </style>
 </head>
 <body>
-<div class="app">
+
 <header>
-  <div><h1>筑习</h1><div class="date" id="today"></div></div>
-  <button class="iconbtn" onclick="openSettings()">⚙︎</button>
+    <h1>筑习 <span>v12</span></h1>
+    <p>建筑考研学习辅助 · 规范真题 · 错题复盘 · 查漏补缺</p>
 </header>
 
-<div class="grid">
-  <section class="card">
-    <div class="kicker">本周学习</div>
-    <div class="big" id="eff">—%</div>
-    <div class="small">效率</div>
-    <div class="week" id="week"></div>
-  </section>
-  <section class="card">
-    <div class="kicker">今日</div>
-    <div id="todayStats"></div>
-    <div class="actions">
-      <button class="pill primary" onclick="addTask()">＋ 添加任务</button>
-      <button class="pill" onclick="openRoutine()">Routine</button>
+<div class="container">
+    <div id="tab-dashboard" class="tab-content active">
+        <div class="card">
+            <h2>本周学习日历 <span>📅</span></h2>
+            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">每天学习状态一目了然 (● 已完成 | ⚪ 未完成 | — 无任务)</p>
+            <div class="week-grid" id="weekGridContainer"></div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, #FFF9C4, #E8F5E9);">
+            <h2>本周学习小结 📊</h2>
+            <div id="weeklySummaryContent" style="font-size: 13px; line-height: 1.6; color: #333;">加载中...</div>
+        </div>
+
+        <div class="card">
+            <h2>每日任务清单 
+                <button class="btn" style="width: auto; padding: 4px 10px; font-size: 12px;" onclick="openAddTaskModal()">+ 添加任务</button>
+            </h2>
+            <div id="taskList"></div>
+        </div>
     </div>
-  </section>
+
+    <div id="tab-questions" class="tab-content">
+        <div class="card">
+            <h2>规范题库速查与随机练习 📖</h2>
+            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">来源：重庆大学版《建筑设计规范常用条文速查手册》PDF</p>
+            <button class="btn" onclick="loadRandomQuestion()">🎲 随机抽取一道规范题</button>
+            <div id="questionDisplayArea" style="margin-top: 15px;">
+                <div class="qb-box">
+                    <p style="font-weight: bold; color: #4A3B5C;" id="qChapter">请点击上方按钮开始随机抽取题目</p>
+                    <p id="qText">题目内容将在此处展示...</p>
+                    <button class="btn btn-secondary" id="btnShowAnswer" style="margin-top: 8px; display:none;" onclick="toggleAnswer()">查看参照</button>
+                    <div id="qAnswerBox" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #D1C4E9;">
+                        <p style="color: #2E7D32; font-weight: 600;" id="qAnswerText"></p>
+                        <p style="font-size: 12px; color: #666;" id="qBasisText"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="warning-tip">⚠️ <b>特别提示</b>：正式考试使用前，请与目标院校指定规范及现行规范版本核对。</div>
+        </div>
+    </div>
+
+    <div id="tab-english" class="tab-content">
+        <div class="card">
+            <h2>英语每日高价值错误复盘 📝</h2>
+            <form id="englishForm" onsubmit="saveEnglishRecord(event)">
+                <label style="font-size: 12px; color: var(--text-sub);">错误类型：</label>
+                <select id="engType" required>
+                    <option value="选项辨析">选项辨析</option>
+                    <option value="细节定位">细节定位</option>
+                    <option value="词义/熟词僻义">词义/熟词僻义</option>
+                    <option value="长难句理解">长难句理解</option>
+                    <option value="逻辑判断">逻辑判断</option>
+                    <option value="粗心/误读">粗心/误读</option>
+                    <option value="其他">其他</option>
+                </select>
+                <label style="font-size: 12px; color: var(--text-sub);">为什么错？（自由填写）</label>
+                <textarea id="engReason" rows="2" placeholder="例如：看懂文章了，但比较选项时凭第一感觉..." required></textarea>
+                <label style="font-size: 12px; color: var(--text-sub);">下次提醒：</label>
+                <input type="text" id="engTip" placeholder="例如：选项都觉得对时必须回原文找证据" required>
+                <button class="btn" type="submit">保存今日英语复盘</button>
+            </form>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, #E3F2FD, #F3E5F5);">
+            <h2>本月英语错误智能总结 📈</h2>
+            <div id="monthlyEnglishSummary" style="font-size: 13px; line-height: 1.6;">暂无足够数据，快去记录第一条错误吧！</div>
+        </div>
+
+        <div class="card">
+            <h2>英语历史复盘记录 📚</h2>
+            <div id="englishHistoryList"></div>
+        </div>
+    </div>
+
+    <div id="tab-profession" class="tab-content">
+        <div class="card">
+            <h2>专业课「还没记牢的细节点」 🏛️</h2>
+            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">记录知道但目前不能完整、准确复述的知识漏洞。</p>
+            <form id="profForm" onsubmit="saveProfRecord(event)">
+                <textarea id="profContent" rows="3" placeholder="例如：拜占庭建筑集中式构图的核心特点及与罗马风的区别..." required></textarea>
+                <button class="btn" type="submit">记录漏洞并开始攻克</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2>漏洞攻克本（历史与当前） 🔍</h2>
+            <div id="profList"></div>
+        </div>
+    </div>
+
+    <div id="tab-settings" class="tab-content">
+        <div class="card">
+            <h2>数据独立与备份 ⚙️</h2>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">所有数据均安全保存在您的浏览器本地，不上传云端，保护您的个人隐私。</p>
+            <button class="btn" style="margin-bottom: 10px;" onclick="exportDataJSON()">📥 导出本机学习数据 (JSON)</button>
+            <button class="btn btn-secondary" onclick="clearLocalData()">🗑️ 清空所有本地数据</button>
+        </div>
+    </div>
 </div>
 
-<section class="card section">
-  <div class="kicker">今日 Routine</div>
-  <div id="tasks"></div>
-</section>
-
-<section class="card section">
-  <div class="kicker">🏗 今日规范</div>
-  <div id="codeQuestion"></div>
-  <div class="actions"><button class="pill" onclick="openCodeAnswer()">回答</button></div>
-</section>
-
-<section class="card section">
-  <div class="kicker">本周数据</div>
-  <div id="weekly"></div>
-</section>
-</div>
-
-<div class="modal" id="modal"><div class="sheet"><button class="pill close" onclick="closeModal()">关闭</button><div id="sheet"></div></div></div>
-<div class="toast" id="toast"></div>
+<nav class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('dashboard', this)"><span>🏠</span>看板</div>
+    <div class="tab-item" onclick="switchTab('questions', this)"><span>📖</span>规范题库</div>
+    <div class="tab-item" onclick="switchTab('english', this)"><span>✍️</span>英语复盘</div>
+    <div class="tab-item" onclick="switchTab('profession', this)"><span>🏛️</span>专业漏洞</div>
+    <div class="tab-item" onclick="switchTab('settings', this)"><span>⚙️</span>设置</div>
+</nav>
 
 <script>
-const KEY='zhuxi_v11';
-const SUBJECTS=['建筑史','建筑理论','建筑物理','建筑构造技术','英语','政治'];
-const codeBank=[
- {q:'今日规范题：请从你正在复习的规范中，主动回忆一个与楼梯/疏散相关的关键规定，并写出适用条件。',a:'正式题库将在部署版中按你提供的规范 PDF 和指定考试版本建立；当前题目仅用于测试主动回忆流程。'},
- {q:'今日规范题：请主动回忆一个与无障碍设计相关的关键规定，并说明适用范围。',a:'正式题库将在部署版中按你提供的规范 PDF 和指定考试版本建立；当前题目仅用于测试主动回忆流程。'}
-];
-let db=JSON.parse(localStorage.getItem(KEY)||'null')||{tasks:[],reviews:[],settings:{remind:true},codeIndex:0};
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
-function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function iso(d=new Date()){let x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
-function fmt(d){return new Intl.DateTimeFormat('zh-CN',{month:'numeric',day:'numeric',weekday:'short'}).format(d)}
-function stars(n){return '★'.repeat(n)+'☆'.repeat(5-n)}
-function monday(d){d=new Date(d);let n=(d.getDay()+6)%7;d.setDate(d.getDate()-n);d.setHours(0,0,0,0);return d}
-function weekDates(){let m=monday(new Date());return Array.from({length:7},(_,i)=>{let d=new Date(m);d.setDate(m.getDate()+i);return d})}
-function tasksToday(){return db.tasks.filter(t=>t.date===iso())}
-function render(){
- document.getElementById('today').textContent=fmt(new Date());
- renderWeek(); renderTasks(); renderWeekly(); renderCode();
-}
-function renderWeek(){
- let ds=weekDates(), el=document.getElementById('week');
- el.innerHTML=ds.map(d=>`<div class="day ${iso(d)===iso()?'active':''}">${['一','二','三','四','五','六','日'][d.getDay()?d.getDay()-1:6]}<br>${d.getDate()}</div>`).join('');
- let w=db.tasks.filter(t=>ds.some(d=>iso(d)===t.date)), done=w.filter(t=>t.done).length;
- let completion=w.length?Math.round(done/w.length*100):0;
- let mastered=w.filter(t=>t.mastery!=null);
- let mastery=mastered.length?Math.round(mastered.reduce((s,t)=>s+t.mastery,0)/mastered.length):0;
- let hard=w.reduce((s,t)=>s+t.difficulty,0)||1, hardDone=w.filter(t=>t.done).reduce((s,t)=>s+t.difficulty,0);
- let efficiency=w.length?Math.round((hardDone/hard)*100):0;
- document.getElementById('eff').textContent=(w.length?efficiency:0)+'%';
- document.getElementById('weekly').innerHTML=`完成率　<b>${completion}%</b><br>掌握率　<b>${mastery}%</b><br>效率　<b>${efficiency}%</b>`;
- document.getElementById('todayStats').innerHTML=`<b>${tasksToday().filter(t=>t.done).length} / ${tasksToday().length}</b><div class="progress"><i style="width:${tasksToday().length?tasksToday().filter(t=>t.done).length/tasksToday().length*100:0}%"></i></div>`;
-}
-function renderTasks(){
- let ts=tasksToday(), el=document.getElementById('tasks');
- el.innerHTML=ts.length?ts.map(t=>`<div class="task">
- <button class="check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'✓':''}</button>
- <div class="taskmain"><div class="tasktitle">${esc(t.title)}</div><div class="meta">${esc(t.subject)} · <span class="stars">${stars(t.difficulty)}</span>${t.quantity?' · '+t.quantity+'项':''}${t.mastery!=null?' · 掌握 '+t.mastery+'%':''}</div></div>
- <button class="pill" onclick="review('${t.id}')">检测</button>
- </div>`).join(''):'<div class="empty">今天还没有任务。</div>';
-}
-function toggleTask(x){let t=db.tasks.find(t=>t.id===x);t.done=!t.done;save();render();}
-function addTask(pref={}){
- document.getElementById('sheet').innerHTML=`<h2>添加任务</h2>
- <label>科目</label><select id="fsub">${SUBJECTS.map(s=>`<option>${s}</option>`).join('')}</select>
- <label>任务内容</label><input id="ftitle" placeholder="例如：外国建筑史｜文艺复兴建筑">
- <div class="row"><div><label>难度</label><select id="fdiff">${[1,2,3,4,5].map(n=>`<option value="${n}">${stars(n)}</option>`).join('')}</select></div>
- <div><label>数量（英语/政治可用）</label><input id="fqty" placeholder="可留空"></div></div>
- <label>日期</label><input id="fdate" type="date" value="${iso()}">
- <label>重复</label><select id="frepeat"><option value="none">不重复</option><option value="daily">每天</option><option value="weekly">每周同一天</option></select>
- <div class="actions"><button class="pill primary" onclick="saveTask()">保存</button></div>`;
- openModal()
-}
-function saveTask(){
- let t={id:id(),subject:fsub.value,title:ftitle.value.trim()||'未命名任务',difficulty:+fdiff.value,quantity:(fsub.value==='英语'||fsub.value==='政治')?fqty.value.trim():'',date:fdate.value,repeat:frepeat.value,done:false,mastery:null};
- db.tasks.push(t);
- if(t.repeat==='daily'||t.repeat==='weekly'){for(let i=1;i<=28;i++){let d=new Date(t.date);d.setDate(d.getDate()+i);if(t.repeat==='weekly'&&i%7)continue;db.tasks.push({...t,id:id(),date:iso(d),done:false,mastery:null})}}
- save();closeModal();render();toast('任务已建立')
-}
-function review(x){
- let t=db.tasks.find(t=>t.id===x);if(!t)return;
- const qs={
-  '建筑史':['不看资料，你能否复述这一部分的历史背景？','不看资料，你能否说出核心内容/主要特征？','你能否说出相关人物、作品及关系？','你能否解释其思想或影响？','如果现在出现简答题，你能否独立组织答案？'],
-  '建筑理论':['能否说出概念及定义？','能否解释产生背景？','能否复述核心观点？','能否联系代表人物/作品？','能否组织成考试答案？'],
-  '建筑物理':['能否说出基本概念？','能否解释原理？','能否说出关键参数/条件？','能否解释影响因素？','能否联系建筑应用？'],
-  '建筑构造技术':['能否说出构造目的？','能否复述构造组成？','能否说出基本做法？','能否解释关键节点/条件？','能否指出易错点？'],
-  '英语':['不看资料，你能否回忆本次重点？','能否解释错题/生词？','能否再次独立完成相关判断？'],
-  '政治':['能否复述核心概念？','能否解释其逻辑关系？','能否联系题目进行判断？']
- }[t.subject]||['不看资料，你能否复述核心内容？','能否解释它？','能否用于考试？'];
- document.getElementById('sheet').innerHTML=`<h2>${esc(t.title)} · 熟悉度检测</h2>${qs.map((q,i)=>`<div class="q"><b>${i+1}.</b> ${q}<label>你的状态</label><select id="q${i}"><option value="100">完全可以</option><option value="80">大部分可以</option><option value="60">只能想起一点</option><option value="30">基本不会</option></select><label>可选：主动回忆记录</label><textarea id="a${i}" placeholder="可以输入，也可以留空，直接在脑中回答。"></textarea></div>`).join('')}<div class="actions"><button class="pill primary" onclick="saveReview('${t.id}',${qs.length})">生成掌握率</button></div>`;
- openModal()
-}
-function saveReview(x,n){
- let vals=[];for(let i=0;i<n;i++)vals.push(+document.getElementById('q'+i).value);
- let m=Math.round(vals.reduce((a,b)=>a+b,0)/n),t=db.tasks.find(t=>t.id===x);t.mastery=m;
- db.reviews.push({id:id(),taskId:x,date:iso(),mastery:m});save();closeModal();render();toast('掌握率：'+m+'%')
-}
-function renderCode(){let c=codeBank[db.codeIndex%codeBank.length];document.getElementById('codeQuestion').innerHTML=`<div style="font-size:16px">${esc(c.q)}</div><div class="small" style="margin-top:8px">规范题库待根据你提供的正式 PDF 建立</div>`}
-function openCodeAnswer(){let c=codeBank[db.codeIndex%codeBank.length];document.getElementById('sheet').innerHTML=`<h2>今日规范</h2><p>${esc(c.q)}</p><textarea id="codeA" placeholder="先独立回答，再查看答案。"></textarea><div class="actions"><button class="pill primary" onclick="showCode()">查看依据</button></div>`;openModal()}
-function showCode(){let c=codeBank[db.codeIndex%codeBank.length];document.getElementById('sheet').innerHTML+=`<div class="card section"><b>当前版本提示</b><p class="small">${esc(c.a)}</p></div>`}
-function openRoutine(){document.getElementById('sheet').innerHTML=`<h2>Routine</h2><p class="small">固定任务会按规则生成未来实例。你可以继续通过“添加任务”建立新的周期任务。</p><div class="actions"><button class="pill primary" onclick="addTask()">＋ 新建 Routine</button></div>`;openModal()}
-function openSettings(){document.getElementById('sheet').innerHTML=`<h2>设置</h2><p>第一版数据全部保存在本机浏览器。</p><p class="small">iPad 主屏幕安装需要通过 HTTPS 网页；20:00 的系统级推送通知需要后续接入 Web Push/服务器，因此本轻量版先保留应用内提醒能力。</p><div class="actions"><button class="pill" onclick="exportData()">导出数据</button><button class="pill" onclick="clearData()">清空数据</button></div>`;openModal()}
-function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='筑习_学习数据.json';a.click()}
-function clearData(){if(confirm('确定清空所有本机数据吗？')){localStorage.removeItem(KEY);location.reload()}}
-function openModal(){document.getElementById('modal').classList.add('show')}
-function closeModal(){document.getElementById('modal').classList.remove('show')}
-function toast(s){let e=document.getElementById('toast');e.textContent=s;e.style.display='block';setTimeout(()=>e.style.display='none',1800)}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-render();
+    function migrateData() {
+        const v11Tasks = localStorage.getItem('zhuxi_v11_tasks') || localStorage.getItem('zhuxi_tasks');
+        if (v11Tasks && !localStorage.getItem('zhuxi_v12_migrated')) {
+            try {
+                localStorage.setItem('zhuxi_v12_tasks', v11Tasks);
+                localStorage.setItem('zhuxi_v12_migrated', 'true');
+            } catch(e) {}
+        }
+    }
+    migrateData();
+
+    function getData(key, defaultVal) {
+        const val = localStorage.getItem('zhuxi_v12_' + key);
+        return val ? JSON.parse(val) : defaultVal;
+    }
+    function saveData(key, val) {
+        localStorage.setItem('zhuxi_v12_' + key, JSON.stringify(val));
+    }
+
+    let tasks = getData('tasks', [
+        { id: 1, title: '背诵建筑史：宋代建筑特征', subject: '建筑史', date: new Date().toISOString().split('T')[0], completed: true },
+        { id: 2, title: '刷规范题库 30 题', subject: '规范', date: new Date().toISOString().split('T')[0], completed: false },
+        { id: 3, title: '完成英语真题阅读精读', subject: '英语', date: new Date().toISOString().split('T')[0], completed: false }
+    ]);
+
+    let englishRecords = getData('english', [
+        { id: 1, date: '2026-09-09', type: '选项辨析', reason: '看懂文章但比较选项时凭第一感觉，没有回原文核对。', tip: '选项都觉得对时必须回原文找证据。' }
+    ]);
+
+    let profRecords = getData('prof', [
+        { id: 1, date: '2026-09-09', content: '拜占庭建筑集中式构图的核心特点及鼓座应用。', mastered: false }
+    ]);
+
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        el.classList.add('active');
+        if (tabId === 'dashboard') renderDashboard();
+        if (tabId === 'english') renderEnglish();
+        if (tabId === 'profession') renderProfession();
+    }
+
+    function renderDashboard() {
+        renderWeekGrid();
+        renderTasks();
+        renderWeeklySummary();
+    }
+
+    function renderWeekGrid() {
+        const container = document.getElementById('weekGridContainer');
+        const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        let html = '';
+        days.forEach(d => {
+            html += `<div class="day-node"><div class="d-name">${d}</div><div class="d-icon status-done">●</div></div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderWeeklySummary() {
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(t => t.completed).length;
+        const rate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        const engCount = englishRecords.length;
+        const profUnmastered = profRecords.filter(p => !p.mastered).length;
+
+        document.getElementById('weeklySummaryContent').innerHTML = `
+            • <b>本月任务完成率</b>：${rate}%（共完成 ${completedTasks}/${totalTasks} 项任务）。<br>
+            • <b>英语复盘</b>：本周累计高价值错误记录 ${engCount} 条。<br>
+            • <b>专业漏洞</b>：当前有 ${profUnmastered} 个细节点尚未完全掌握。<br>
+            • <b>下周建议</b>：减少无效重复阅读，增加主动回忆与规范题库真题演练。
+        `;
+    }
+
+    function renderTasks() {
+        const list = document.getElementById('taskList');
+        if (tasks.length === 0) {
+            list.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">暂无任务，点击上方添加新任务吧！</p>';
+            return;
+        }
+        let html = '';
+        tasks.forEach(t => {
+            html += `
+            <div class="task-item-wrapper">
+                <div class="task-delete-action" onclick="deleteTask(${t.id})">删除</div>
+                <div class="task-item ${t.completed ? 'completed' : ''}">
+                    <div class="task-info">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" style="width:18px;height:18px;margin:0;">
+                        <div>
+                            <span class="t-title" style="font-size:14px; font-weight:500;">${t.title}</span>
+                            <div style="margin-top:2px;"><span class="badge">${t.subject}</span> <span style="font-size:11px; color:var(--text-sub);">${t.date}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function toggleTask(id) {
+        tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+        saveData('tasks', tasks);
+        renderTasks();
+    }
+
+    function deleteTask(id) {
+        if (confirm('确认删除该任务吗？')) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveData('tasks', tasks);
+            renderTasks();
+        }
+    }
+
+    function openAddTaskModal() {
+        const title = prompt('请输入新任务名称：', '规范条文速查第一章');
+        if (!title) return;
+        const subject = prompt('请输入学科（建筑史 / 规划 / 规范 / 英语）：', '规范');
+        tasks.push({
+            id: Date.now(),
+            title: title,
+            subject: subject || '通用',
+            date: new Date().toISOString().split('T')[0],
+            completed: false
+        });
+        saveData('tasks', tasks);
+        renderTasks();
+    }
+
+    async function loadRandomQuestion() {
+        if (window.codeBankAdapter && !window.codeBankAdapter.loaded) {
+            await window.codeBankAdapter.init();
+        }
+        const q = window.codeBankAdapter ? window.codeBankAdapter.getRandomQuestion() : null;
+        if (!q) {
+            alert('题库正在加载或未找到 code-bank.json');
+            return;
+        }
+        document.getElementById('qChapter').innerText = `${q.chapter} — ${q.section} (条文: ${q.code_no})`;
+        document.getElementById('qText').innerText = q.question;
+        document.getElementById('qAnswerText').innerText = '参照答案: ' + q.answer;
+        document.getElementById('qBasisText').innerText = `规范依据: ${q.basis} (P${q.page})`;
+        document.getElementById('btnShowAnswer').style.display = 'block';
+        document.getElementById('qAnswerBox').style.display = 'none';
+    }
+
+    function toggleAnswer() {
+        const box = document.getElementById('qAnswerBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveEnglishRecord(e) {
+        e.preventDefault();
+        const type = document.getElementById('engType').value;
+        const reason = document.getElementById('engReason').value;
+        const tip = document.getElementById('engTip').value;
+
+        englishRecords.unshift({ id: Date.now(), date: new Date().toISOString().split('T')[0], type, reason, tip });
+        saveData('english', englishRecords);
+        document.getElementById('englishForm').reset();
+        renderEnglish();
+        alert('英语复盘记录保存成功！');
+    }
+
+    function renderEnglish() {
+        renderMonthlyEnglishSummary();
+        const list = document.getElementById('englishHistoryList');
+        if (englishRecords.length === 0) {
+            list.innerHTML = '<p style="font-size:13px; color:var(--text-sub);">暂无复盘记录</p>';
+            return;
+        }
+        let html = '';
+        englishRecords.forEach(r => {
+            html += `
+            <div class="record-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span class="badge">${r.type}</span>
+                    <span style="font-size:11px; color:var(--text-sub);">${r.date}</span>
+                </div>
+                <p><b>为什么错：</b>${r.reason}</p>
+                <p style="margin-top:4px; color:#2E7D32;"><b>下次提醒：</b>${r.tip}</p>
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function renderMonthlyEnglishSummary() {
+        const total = englishRecords.length;
+        if (total === 0) {
+            document.getElementById('monthlyEnglishSummary').innerHTML = '本月暂无错误记录。';
+            return;
+        }
+        let counts = {};
+        englishRecords.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+        let sortedTypes = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+        let typeHtml = sortedTypes.map(([t, c]) => `• ${t}: ${c} 次`).join('<br>');
+        let topIssue = sortedTypes[0] ? sortedTypes[0][0] : '无';
+
+        document.getElementById('monthlyEnglishSummary').innerHTML = `
+            • <b>本月共记录错题</b>：${total} 次。<br>
+            • <b>错误类型统计</b>：<br>${typeHtml}<br>
+            • <b>最突出问题 TOP 1</b>：<b>${topIssue}</b>。<br>
+            • <b>本月建议</b>：遇到选项都觉得对的时候，必须坚决回原文找对应证据。
+        `;
+    }
+
+    function saveProfRecord(e) {
+        e.preventDefault();
+        const content = document.getElementById('profContent').value;
+        profRecords.unshift({ id: Date.now(), date: new Date().toISOString().split('T')[0], content, mastered: false });
+        saveData('prof', profRecords);
+        document.getElementById('profForm').reset();
+        renderProfession();
+        alert('专业漏洞记录成功！');
+    }
+
+    function toggleProfMastered(id) {
+        profRecords = profRecords.map(p => p.id === id ? {...p, mastered: !p.mastered} : p);
+        saveData('prof', profRecords);
+        renderProfession();
+    }
+
+    function renderProfession() {
+        const list = document.getElementById('profList');
+        if (profRecords.length === 0) {
+            list.innerHTML = '<p style="font-size:13px; color:var(--text-sub);">暂无专业漏洞记录</p>';
+            return;
+        }
+        let html = '';
+        profRecords.forEach(p => {
+            html += `
+            <div class="record-card ${p.mastered ? 'mastered' : ''}">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:11px; color:var(--text-sub);">${p.date}</span>
+                    <button class="btn btn-secondary" style="width:auto; padding:2px 8px; font-size:11px;" onclick="toggleProfMastered(${p.id})">
+                        ${p.mastered ? '✓ 已掌握 (点击撤销)' : '标记为已掌握'}
+                    </button>
+                </div>
+                <p style="font-size:13px; font-weight:500;">${p.content}</p>
+                <div style="margin-top:4px; font-size:11px; color:${p.mastered ? '#2E7D32' : '#E65100'};">
+                    状态：${p.mastered ? '已攻克掌握 ✓' : '○ 尚未完整掌握'}
+                </div>
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function exportDataJSON() {
+        const exportObj = { tasks, englishRecords, profRecords, exportTime: new Date().toISOString() };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "zhuxi_v12_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function clearLocalData() {
+        if (confirm('确认清空所有本地学习数据吗？')) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    renderDashboard();
 </script>
 </body>
 </html>
