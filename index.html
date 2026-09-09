@@ -1149,4 +1149,159 @@
     renderVulnerabilities();
 </script>
 </body>
+    <script>
+/**
+ * 【筑习增强补丁】英语与专业课复盘：修改与删除功能
+ * 保持原库所有功能不变，采用非侵入式劫持与DOM注入
+ */
+(function() {
+    'use strict';
+
+    // 延迟执行，等待原页面的 Vue/Alpine 或原生 JS 渲染完成
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initZhuXiPatch, 1000);
+    });
+
+    function initZhuXiPatch() {
+        console.log("【筑习增强】英语与专业课修改/删除模块已挂载");
+
+        // 定时检查并为列表注入按钮，防止页面局部刷新后按钮丢失
+        setInterval(() => {
+            injectButtons();
+        }, 1500);
+    }
+
+    // 在对应的复盘条目上注入修改和删除按钮
+    function injectButtons() {
+        // 遍历页面中的所有区块，寻找英语复盘或专业漏洞的列表项
+        document.querySelectorAll('div, li').forEach(el => {
+            if (el.dataset.patchInjected) return;
+
+            let text = el.innerText || '';
+            
+            // 判断是否为英语复盘条目（特征：包含英语错误分类如“选项辨析”、“长难句理解”等且没有被注入过）
+            let isEnglishItem = (text.includes('选项辨析') || text.includes('细节定位') || text.includes('长难句理解') || text.includes('熟词僻义')) && !text.includes('记录英语错误');
+            // 判断是否为专业课漏洞条目（特征：通常带有复盘特征或在专业课模块下，可通过特定样式或文本识别）
+            let isProItem = text.includes('未完全掌握') === false && (el.closest('.pro-review-list') || el.className.includes('pro') || (text.length > 10 && el.innerHTML.includes('checkbox') === false && el.parentElement && el.parentElement.innerHTML.includes('专业')));
+
+            // 如果是英语复盘项
+            if (isEnglishItem && !el.querySelector('.custom-patch-btns')) {
+                el.dataset.patchInjected = 'true';
+                appendActionButtons(el, 'english');
+            }
+            
+            // 如果是专业课漏洞项（根据你的项目具体容器调整，若有困难可根据类名绑定）
+            if (isProItem && !el.querySelector('.custom-patch-btns') && el.querySelectorAll('div').length < 3) {
+                // 防止误伤大容器，只对叶子节点列表生效
+                if (text.length < 200 && text.length > 5) {
+                    el.dataset.patchInjected = 'true';
+                    appendActionButtons(el, 'pro');
+                }
+            }
+        });
+    }
+
+    // 创建并追加按钮组
+    function appendActionButtons(container, type) {
+        let btnContainer = document.createElement('div');
+        btnContainer.className = 'custom-patch-btns';
+        btnContainer.style.cssText = 'margin-top: 6px; font-size: 12px; display: flex; gap: 12px; border-top: 1px dashed #eee; padding-top: 4px;';
+        
+        let editBtn = document.createElement('span');
+        editBtn.innerHTML = '✏️ 修改';
+        editBtn.style.cssText = 'color: #3b82f6; cursor: pointer; font-weight: 500;';
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            handleEdit(container, type);
+        };
+
+        let deleteBtn = document.createElement('span');
+        deleteBtn.innerHTML = '🗑️ 删除';
+        deleteBtn.style.cssText = 'color: #ef4444; cursor: pointer; font-weight: 500;';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            handleDelete(container, type);
+        };
+
+        btnContainer.appendChild(editBtn);
+        btnContainer.appendChild(deleteBtn);
+        container.appendChild(btnContainer);
+    }
+
+    // 处理修改逻辑：读取 LocalStorage -> 更新对应项 -> 写回 -> 刷新
+    function handleEdit(element, type) {
+        let contentText = element.innerText.replace('✏️ 修改 🗑️ 删除', '').trim();
+        let targetKey = findLocalStorageKey(type);
+        if (!targetKey) {
+            alert('未找到本地存储数据键');
+            return;
+        }
+
+        let rawData = localStorage.getItem(targetKey);
+        if (!rawData) return;
+        let dataList = JSON.parse(rawData);
+        if (!Array.isArray(dataList)) return;
+
+        // 通过内容模糊匹配找到在数组中的索引
+        let index = dataList.findIndex(item => {
+            let str = typeof item === 'string' ? item : JSON.stringify(item);
+            return str.includes(contentText.substring(0, 10)); // 取前10个字符匹配
+        });
+
+        if (index === -1) {
+            alert('定位不到该条记录的索引');
+            return;
+        }
+
+        let currentVal = typeof dataList[index] === 'string' ? dataList[index] : (dataList[index].content || dataList[index].text || JSON.stringify(dataList[index]));
+        let newVal = prompt('修改复盘内容：', currentVal);
+        
+        if (newVal !== null && newVal.trim() !== '') {
+            if (typeof dataList[index] === 'string') {
+                dataList[index] = newVal;
+            } else if (typeof dataList[index] === 'object') {
+                dataList[index].content = newVal; // 适配对象形式
+            }
+            localStorage.setItem(targetKey, JSON.stringify(dataList));
+            location.reload(); // 刷新页面使原程序重新渲染
+        }
+    }
+
+    // 处理删除逻辑：读取 LocalStorage -> 剔除对应项 -> 写回 -> 刷新
+    function handleDelete(element, type) {
+        if (!confirm('确定要删除这条复盘记录吗？')) return;
+        let contentText = element.innerText.replace('✏️ 修改 🗑️ 删除', '').trim();
+        let targetKey = findLocalStorageKey(type);
+        if (!targetKey) return;
+
+        let rawData = localStorage.getItem(targetKey);
+        if (!rawData) return;
+        let dataList = JSON.parse(rawData);
+        if (!Array.isArray(dataList)) return;
+
+        let index = dataList.findIndex(item => {
+            let str = typeof item === 'string' ? item : JSON.stringify(item);
+            return str.includes(contentText.substring(0, 10));
+        });
+
+        if (index !== -1) {
+            dataList.splice(index, 1);
+            localStorage.setItem(targetKey, JSON.stringify(dataList));
+            location.reload();
+        } else {
+            alert('删除失败：未找到对应数据');
+        }
+    }
+
+    // 智能推导原项目在 LocalStorage 中使用的 Key
+    function findLocalStorageKey(type) {
+        let keys = Object.keys(localStorage);
+        if (type === 'english') {
+            return keys.find(k => k.includes('english') || k.includes('英语') || k.includes('error') || k.includes('错题') || localStorage.getItem(k).includes('选项辨析'));
+        } else {
+            return keys.find(k => k.includes('zhuanye') || k.includes('专业') || k.includes('漏洞') || k.includes('細節') || localStorage.getItem(k).includes('细节点'));
+        }
+    }
+})();
+</script>
 </html>
