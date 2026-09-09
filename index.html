@@ -128,7 +128,7 @@
         .dot-政治 { background: #FF3B30; }
         .dot-通用 { background: #8E8E93; }
 
-        /* 任务列表 */
+        /* 任务列表样式 */
         .task-item {
             background: #FAFAFC;
             padding: 12px;
@@ -200,10 +200,6 @@
             padding: 4px 10px;
             font-size: 12px;
             width: auto;
-        }
-        .btn-danger {
-            background: #FF3B30;
-            color: white;
         }
 
         /* 月历视图样式 */
@@ -289,7 +285,7 @@
             color: white;
         }
 
-        /* 模态框 */
+        /* 模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -312,6 +308,7 @@
             padding: 20px;
         }
 
+        /* 底部导航栏 */
         nav.tab-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -376,17 +373,18 @@
         </div>
     </div>
 
-    <!-- TAB 2: 学科知识树 (升级为无限嵌套思维导图模式) -->
+    <!-- TAB 2: 学科知识树 (无限思维导图) -->
     <div id="tab-tree" class="tab-content">
         <div class="card">
             <h2>🌳 学科思维导图与无限知识树</h2>
-            <p style="font-size:11px; color:var(--text-sub); margin-bottom:12px;">提示：可直接编辑节点名称，通过“+子节点”无限扩展分支或删除分支。</p>
+            <p style="font-size:11px; color:var(--text-sub); margin-bottom:12px;">提示：可自由修改节点名称，通过“+子节点”无限向下扩展分支或删除分支。</p>
             <div class="tree-container" id="treeRootContainer"></div>
         </div>
     </div>
 
-    <!-- TAB 3: 规范与复习 (集成中国最新建筑防火与无障碍国标检索) -->
+    <!-- TAB 3: 规范复习与错题/漏洞本模块 -->
     <div id="tab-review" class="tab-content">
+        <!-- 每日建筑规范抽查 -->
         <div class="card">
             <h2>🏛️ 每日建筑规范考点抽查</h2>
             <div style="background: #F9F9FB; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 0.5px solid var(--separator);">
@@ -398,23 +396,47 @@
             <button class="btn btn-secondary" onclick="loadDailyCodeQuestion()">换一题</button>
         </div>
 
+        <!-- 规范智能查找 -->
         <div class="card">
             <h2>🔍 最新建筑消防与无障碍规范智能查找</h2>
             <div style="display:flex; gap:6px; margin-bottom:10px;">
                 <input type="text" id="searchInput" placeholder="请输入关键字（如：防火分区、疏散、无障碍、坡道）" style="margin-bottom:0;">
                 <button class="btn btn-small" onclick="searchNorms()" style="width:auto; white-space:nowrap;">查找</button>
             </div>
-            <div id="searchResults" style="max-height:220px; overflow-y:auto; border:0.5px solid var(--separator); border-radius:8px; padding:8px; background:#FAFAFC; font-size:12px;">
-                <div style="color:var(--text-sub); text-align:center; padding:10px;">输入关键词检索中国国家最新规范标准。</div>
+            <div id="searchResults" style="max-height:180px; overflow-y:auto; border:0.5px solid var(--separator); border-radius:8px; padding:8px; background:#FAFAFC; font-size:12px;">
+                <div style="color:var(--text-sub); text-align:center; padding:6px;">输入关键词检索中国国家最新规范标准。</div>
             </div>
+        </div>
+
+        <!-- 每日英语错误复盘 -->
+        <div class="card">
+            <h2>📖 每日英语错误复盘 <button class="btn btn-small" onclick="openAddEnglishErrorModal()">+ 记一条错误</button></h2>
+            <p style="font-size:11px; color:var(--text-sub); margin-bottom:8px;">本地永久保存，随时查阅历史复盘。</p>
+            <div id="englishErrorListContainer"></div>
+            <button class="btn btn-secondary" style="margin-top:8px;" onclick="openEnglishMonthlySummaryModal()">📊 查看英语月度错误总结</button>
+        </div>
+
+        <!-- 专业课还没记牢的细节点漏洞本 -->
+        <div class="card">
+            <h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openAddVulnerabilityModal()">+ 记个小漏洞</button></h2>
+            <p style="font-size:11px; color:var(--text-sub); margin-bottom:8px;">记录知道但无法完整复述的漏洞，标为已掌握可保留历史。</p>
+            <div id="vulnerabilityListContainer"></div>
         </div>
     </div>
 
-    <!-- TAB 4: 设置 -->
+    <!-- TAB 4: 设置与每周学习小结 -->
     <div id="tab-settings" class="tab-content">
         <div class="card">
+            <h2>📊 每周自动学习总结</h2>
+            <div id="weeklySummaryContent" style="background:#F9F9FB; padding:12px; border-radius:8px; font-size:13px; line-height:1.5; border:0.5px solid var(--separator); margin-bottom:12px;">
+                正在根据真实打卡、英语错题与专业漏洞生成小结...
+            </div>
+            <button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button>
+        </div>
+
+        <div class="card">
             <h2>⚙️ 系统设置</h2>
-            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 10px;">所有打卡与知识树等本地数据均安全加密存储。</p>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 10px;">所有打卡、错题与知识树数据均安全存储在本地。</p>
             <button class="btn btn-secondary" onclick="simulate2000Reminder()" style="margin-bottom: 10px;">🔔 测试 20:00 晚间提醒</button>
             <button class="btn btn-secondary" onclick="clearAllData()" style="color: #FF3B30;">🗑️ 清空所有数据</button>
         </div>
@@ -430,11 +452,58 @@
     </div>
 </div>
 
+<!-- 英语错题添加弹窗 -->
+<div id="englishErrorModal" class="modal">
+    <div class="modal-content">
+        <h2>📖 记录英语错误</h2>
+        <label style="font-size:12px; color:var(--text-sub);">① 错误类型：</label>
+        <select id=" errType">
+            <option value="选项辨析">选项辨析</option>
+            <option value="细节定位">细节定位</option>
+            <option value="词义/熟词僻义">词义/熟词僻义</option>
+            <option value="长难句理解">长难句理解</option>
+            <option value="逻辑判断">逻辑判断</option>
+            <option value="粗心/误读">粗心/误读</option>
+            <option value="其他">其他</option>
+        </select>
+        <label style="font-size:12px; color:var(--text-sub);">② 为什么错？（详细记录复盘）：</label>
+        <textarea id="errReason" rows="3" placeholder="例如：看懂文章了，但比较选项时凭直觉，未回原文核对..."></textarea>
+        <label style="font-size:12px; color:var(--text-sub);">③ 下次提醒 / 注意事项：</label>
+        <input type="text" id="errTip" placeholder="例如：选项都觉得对时，必须回原文找硬证据。">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" onclick="saveEnglishError()">保存复盘</button>
+            <button class="btn btn-secondary" onclick="closeEnglishErrorModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 英语月度总结弹窗 -->
+<div id="englishMonthlyModal" class="modal">
+    <div class="modal-content">
+        <h2>📊 英语月度错误总结</h2>
+        <div id="monthlySummaryBody" style="font-size:13px; line-height:1.6; margin:10px 0;"></div>
+        <button class="btn btn-secondary" onclick="closeEnglishMonthlyModal()">关闭</button>
+    </div>
+</div>
+
+<!-- 专业课漏洞记录弹窗 -->
+<div id="vulnerabilityModal" class="modal">
+    <div class="modal-content">
+        <h2>🧠 记个未完全掌握的细节点</h2>
+        <label style="font-size:12px; color:var(--text-sub);">细节点描述：</label>
+        <textarea id="vulnDesc" rows="3" placeholder="例如：拜占庭建筑集中式构图的核心特点及与巴西利卡式的区别..."></textarea>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" onclick="saveVulnerability()">保存漏洞</button>
+            <button class="btn btn-secondary" onclick="closeVulnerabilityModal()">取消</button>
+        </div>
+    </div>
+</div>
+
 <nav class="tab-bar">
     <div class="tab-item active" onclick="switchTab('dashboard', this)"><span>📅</span>看板</div>
     <div class="tab-item" onclick="switchTab('tree', this)"><span>🌳</span>知识树</div>
-    <div class="tab-item" onclick="switchTab('review', this)"><span>🏛️</span>规范</div>
-    <div class="tab-item" onclick="switchTab('settings', this)"><span>⚙️</span>设置</div>
+    <div class="tab-item" onclick="switchTab('review', this)"><span>🏛️</span>规范/复盘</div>
+    <div class="tab-item" onclick="switchTab('settings', this)"><span>⚙️</span>小结/设置</div>
 </nav>
 
 <script>
@@ -450,13 +519,12 @@
     const todayStr = new Date().toISOString().split('T')[0];
 
     const defaultTasks = [
-        { id: 1, title: "拜占庭建筑核心特征与圣索菲亚大教堂", subject: "建筑史", date: todayStr, completed: false, mastery: 40 },
-        { id: 2, title: "英语真题阅读长难句精析", subject: "英语", date: todayStr, completed: false, mastery: 60 },
-        { id: 3, title: "公共建筑安全出口与疏散距离", subject: "建筑物理", date: todayStr, completed: true, mastery: 90 },
-        { id: 4, title: "政治马哲核心原理辨析", subject: "政治", date: todayStr, completed: false, mastery: 50 }
+        { id: 1, title: "拜占庭建筑核心特征与圣索菲亚大教堂", subject: "建筑史", date: todayStr, completed: false, difficulty: 4, mastery: 40, repeat: false },
+        { id: 2, title: "英语真题阅读长难句精析", subject: "英语", date: todayStr, completed: false, difficulty: 5, mastery: 60, repeat: true },
+        { id: 3, title: "公共建筑安全出口与疏散距离", subject: "建筑物理", date: todayStr, completed: true, difficulty: 3, mastery: 90, repeat: false },
+        { id: 4, title: "政治马哲核心原理辨析", subject: "政治", date: todayStr, completed: false, difficulty: 3, mastery: 50, repeat: false }
     ];
 
-    // 思维导图无限树状数据结构
     const defaultTree = {
         id: 1,
         name: "建筑考研核心知识体系",
@@ -488,7 +556,6 @@
         ]
     };
 
-    // 最新建筑消防与无障碍国家规范数据库
     const nationalNormsDatabase = [
         { title: "《建筑防火通用规范》 GB 55037-2022", category: "防火通用", content: "强制性工程建设规范。涵盖建筑分类、耐火等级、总平面布局、防火分区、平面布置及安全疏散底线要求。" },
         { title: "《消防设施通用规范》 GB 55036-2022", category: "消防设施", content: "规范室内外消火栓系统、自动灭火系统、火灾自动报警系统及防排烟设施设置标准。" },
@@ -507,6 +574,12 @@
 
     let tasks = getData('tasks', defaultTasks);
     let subjectTree = getData('tree', defaultTree);
+    let englishErrors = getData('english_errors', [
+        { id: 1, date: "2026-09-08", type: "选项辨析", reason: "看懂文章了，但比较选项时凭直觉，没有回原文核对。", tip: "选项都觉得对时，必须找硬证据。" }
+    ]);
+    let vulnerabilities = getData('vulnerabilities', [
+        { id: 1, date: "2026-09-08", desc: "拜占庭建筑集中式构图的核心特点及与巴西利卡式的演变关系", mastered: false }
+    ]);
 
     function switchTab(tabId, el) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -518,6 +591,11 @@
         if (tabId === 'review') {
             loadDailyCodeQuestion();
             searchNorms();
+            renderEnglishErrors();
+            renderVulnerabilities();
+        }
+        if (tabId === 'settings') {
+            renderWeeklySummary();
         }
     }
 
@@ -605,7 +683,7 @@
                 html += `
                 <div style="background:#F9F9FB; padding:8px; border-radius:6px; margin-bottom:6px; border:0.5px solid var(--separator);">
                     <span class="badge">${t.subject}</span> <span style="font-size:13px; font-weight:500;">${t.title}</span>
-                    <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">状态: ${t.completed ? '已完成' : '未完成'} | 掌握率: ${t.mastery || 50}%</div>
+                    <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">难度: ${'★'.repeat(t.difficulty || 3)} | 状态: ${t.completed ? '已完成' : '未完成'} | 掌握率: ${t.mastery || 50}%</div>
                 </div>`;
             });
         }
@@ -636,7 +714,9 @@
                             <span style="font-size:13px; font-weight:500; ${t.completed ? 'text-decoration:line-through;color:var(--text-sub);' : ''}">${t.title}</span>
                             <div style="margin-top:2px; display:flex; gap:6px; align-items:center;">
                                 <span class="badge">${t.subject}</span>
+                                <span style="font-size:11px; color:var(--text-sub);">难度: ${'★'.repeat(t.difficulty || 3)}</span>
                                 <span style="font-size:11px; color:var(--text-sub);">掌握率: ${t.mastery || 50}%</span>
+                                ${t.repeat ? '<span class="badge" style="background:#E0F2FE; color:#0369A1;">🔁重复</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -651,7 +731,33 @@
     }
 
     function toggleTask(id) {
-        tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+        tasks = tasks.map(t => {
+            if (t.id === id) {
+                const newCompleted = !t.completed;
+                // 如果是重复任务且被勾选完成，自动向后生成明天的一条相同任务
+                if (newCompleted && t.repeat) {
+                    let nextD = new Date();
+                    nextD.setDate(nextD.getDate() + 1);
+                    let nextDStr = nextD.toISOString().split('T')[0];
+                    // 检查明天是否已有该任务，避免重复生成
+                    const exists = tasks.some(x => x.title === t.title && x.date === nextDStr);
+                    if (!exists) {
+                        tasks.push({
+                            id: Date.now(),
+                            title: t.title,
+                            subject: t.subject,
+                            date: nextDStr,
+                            completed: false,
+                            difficulty: t.difficulty || 3,
+                            mastery: t.mastery || 50,
+                            repeat: true
+                        });
+                    }
+                }
+                return {...t, completed: newCompleted};
+            }
+            return t;
+        });
         saveData('tasks', tasks);
         renderDashboard();
     }
@@ -668,6 +774,8 @@
         const title = prompt('任务名称：', '古希腊柱式复习');
         if (!title) return;
         const sub = prompt('科目 (建筑史/建筑理论/建筑物理/构造技术/英语/政治)：', '建筑史');
+        const diff = prompt('任务难度 (1~5星，输入数字1-5)：', '3');
+        const isRepeat = confirm('是否设为「重复任务」（勾选完成后自动向后生成明天的任务）？');
         
         tasks.push({
             id: Date.now(),
@@ -675,7 +783,9 @@
             subject: subjects.includes(sub) ? sub : '通用',
             date: todayStr,
             completed: false,
-            mastery: 50
+            difficulty: parseInt(diff) || 3,
+            mastery: 50,
+            repeat: isRepeat
         });
         saveData('tasks', tasks);
         renderDashboard();
@@ -692,11 +802,11 @@
         }
         html += `
         <div style="margin-top:10px;">
-            <p style="font-size:12px; margin-bottom:6px;">自评掌握度：</p>
+            <p style="font-size:12px; margin-bottom:6px;">掌握率百分比调整：</p>
             <div style="display:flex; gap:6px;">
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 90)">🟢 熟练</button>
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 60)">🟡 一般</button>
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 30)">🔴 遗忘</button>
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 90)">🟢 90% 熟练</button>
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 60)">🟡 60% 一般</button>
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 30)">🔴 30% 遗忘</button>
             </div>
         </div>`;
         document.getElementById('modalBody').innerHTML = html;
@@ -711,14 +821,190 @@
         alert('掌握率已更新！');
     }
 
-    // 无限层级思维导图知识树渲染逻辑
+    // --- 英语错误复盘相关函数 ---
+    function openAddEnglishErrorModal() {
+        document.getElementById('englishErrorModal').classList.add('active');
+    }
+    function closeEnglishErrorModal() {
+        document.getElementById('englishErrorModal').classList.remove('active');
+    }
+    function saveEnglishError() {
+        const type = document.getElementById('errType').value;
+        const reason = document.getElementById('errReason').value.trim();
+        const tip = document.getElementById('errTip').value.trim();
+        if (!reason) return alert('请填写为什么错！');
+
+        englishErrors.unshift({
+            id: Date.now(),
+            date: todayStr,
+            type: type,
+            reason: reason,
+            tip: tip || '无'
+        });
+        saveData('english_errors', englishErrors);
+        closeEnglishErrorModal();
+        renderEnglishErrors();
+        document.getElementById('errReason').value = '';
+        document.getElementById('errTip').value = '';
+    }
+
+    function renderEnglishErrors() {
+        const container = document.getElementById('englishErrorListContainer');
+        if (!container) return;
+        if (englishErrors.length === 0) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:6px;">暂无英语错误记录。</p>';
+            return;
+        }
+        let html = '';
+        englishErrors.forEach(e => {
+            html += `
+            <div style="background:#F9F9FB; padding:8px; border-radius:6px; margin-bottom:6px; border:0.5px solid var(--separator);">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-sub);">
+                    <span>📅 ${e.date}</span>
+                    <span class="badge">${e.type}</span>
+                </div>
+                <div style="font-size:13px; margin-top:4px;"><b>错因：</b>${e.reason}</div>
+                <div style="font-size:12px; color:#0369A1; margin-top:2px;"><b>下次提醒：</b>${e.tip}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function openEnglishMonthlySummaryModal() {
+        const total = englishErrors.length;
+        const typeCounts = {};
+        englishErrors.forEach(e => {
+            typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
+        });
+
+        // 排序找出最主要问题
+        const sortedTypes = Object.entries(typeCounts).sort((a,b) => b[1] - a[1]);
+        
+        let html = `<p><b>本月共记录错误：</b> ${total} 次。</p>`;
+        html += `<p style="margin-top:6px;"><b>错误类型统计：</b></p><ul style="padding-left:20px; margin-bottom:8px;">`;
+        for (let [k, v] of sortedTypes) {
+            html += `<li>${k}：${v} 次</li>`;
+        }
+        html += `</ul>`;
+
+        if (sortedTypes.length > 0) {
+            html += `<p><b>🔥 本月最突出 Top 问题：</b> ${sortedTypes[0][0]}</p>`;
+            if (sortedTypes[0][1] >= 3) {
+                html += `<p style="color:#FF3B30; margin-top:4px;">⚠️ 注意：「${sortedTypes[0][0]}」连续出现多次，是当前最需要集中解决的瓶颈！</p>`;
+            }
+            html += `<p style="margin-top:6px;"><b>💡 下个月建议：</b> 重点针对“${sortedTypes[0][0]}”进行专项突破，做真题时遇到犹豫选项必须强制回原文找硬证据核对，减少直觉误判。</p>`;
+        } else {
+            html += `<p>本月暂无充分错误数据，请持续记录。</p>`;
+        }
+
+        document.getElementById('monthlySummaryBody').innerHTML = html;
+        document.getElementById('englishMonthlyModal').classList.add('active');
+    }
+    function closeEnglishMonthlyModal() {
+        document.getElementById('englishMonthlyModal').classList.remove('active');
+    }
+
+    // --- 专业课细节点漏洞本相关函数 ---
+    function openAddVulnerabilityModal() {
+        document.getElementById('vulnerabilityModal').classList.add('active');
+    }
+    function closeVulnerabilityModal() {
+        document.getElementById('vulnerabilityModal').classList.remove('active');
+    }
+    function saveVulnerability() {
+        const desc = document.getElementById('vulnDesc').value.trim();
+        if (!desc) return alert('请填写细节点内容！');
+
+        vulnerabilities.unshift({
+            id: Date.now(),
+            date: todayStr,
+            desc: desc,
+            mastered: false
+        });
+        saveData('vulnerabilities', vulnerabilities);
+        closeVulnerabilityModal();
+        renderVulnerabilities();
+        document.getElementById('vulnDesc').value = '';
+    }
+
+    function toggleVulnerabilityMastered(id) {
+        vulnerabilities = vulnerabilities.map(v => v.id === id ? {...v, mastered: !v.mastered} : v);
+        saveData('vulnerabilities', vulnerabilities);
+        renderVulnerabilities();
+    }
+
+    function renderVulnerabilities() {
+        const container = document.getElementById('vulnerabilityListContainer');
+        if (!container) return;
+        if (vulnerabilities.length === 0) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:6px;">暂无专业课未掌握漏洞记录。</p>';
+            return;
+        }
+        let html = '';
+        vulnerabilities.forEach(v => {
+            html += `
+            <div style="background:#F9F9FB; padding:8px; border-radius:6px; margin-bottom:6px; border:0.5px solid var(--separator);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-sub);">📅 ${v.date}</span>
+                    <button class="btn btn-small ${v.mastered ? 'btn-secondary' : ''}" style="font-size:10px; padding:2px 6px;" onclick="toggleVulnerabilityMastered(${v.id})">
+                        ${v.mastered ? '✓ 已掌握 (点击撤销)' : '○ 未掌握 (点此标记已掌握)'}
+                    </button>
+                </div>
+                <div style="font-size:13px; margin-top:4px; ${v.mastered ? 'text-decoration:line-through; color:var(--text-sub);' : ''}">${v.desc}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // --- 每周自动学习总结函数 ---
+    function renderWeeklySummary() {
+        const container = document.getElementById('weeklySummaryContent');
+        if (!container) return;
+
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(t => t.completed).length;
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        // 学科分析
+        let subStats = {};
+        subjects.forEach(s => {
+            const sTasks = tasks.filter(t => t.subject === s);
+            const sDone = sTasks.filter(t => t.completed).length;
+            subStats[s] = { total: sTasks.length, done: sDone, rate: sTasks.length > 0 ? sDone / sTasks.length : 0 };
+        });
+
+        let bestSub = "暂无";
+        let worstSub = "暂无";
+        let maxR = -1;
+        let minR = 2;
+        for (let [s, obj] of Object.entries(subStats)) {
+            if (obj.total > 0) {
+                if (obj.rate > maxR) { maxR = obj.rate; bestSub = s; }
+                if (obj.rate < minR) { minR = obj.rate; worstSub = s; }
+            }
+        }
+
+        const weeklyErrCount = englishErrors.length; // 演示取全部或近期
+        const unmasteredVuln = vulnerabilities.filter(v => !v.mastered).length;
+        const totalVuln = vulnerabilities.length;
+
+        let html = `
+        <p><b>📊 本周总览：</b> 本周共安排任务 <b>${totalTasks}</b> 项，已完成 <b>${completedTasks}</b> 项，综合完成率 <b>${completionRate}%</b>。</p>
+        <p style="margin-top:6px;"><b>📚 学科表现：</b> 本周表现较好的学科为 <b>${bestSub}</b>，完成度相对较弱的学科为 <b>${worstSub}</b>。</p>
+        <p style="margin-top:6px;"><b>📖 英语与漏洞：</b> 累计记录英语错误复盘 <b>${weeklyErrCount}</b> 次；专业课细节点漏洞共记录 <b>${totalVuln}</b> 个，当前尚有 <b>${unmasteredVuln}</b> 个未完全掌握。</p>
+        <p style="margin-top:6px; color:var(--accent);"><b>💡 下周建议：</b> 本周任务完成率 ${completionRate}%。建议针对薄弱学科（如 ${worstSub}）加大复习权重，英语继续强化选项辨析与原文证据核对，同时加快消灭未掌握的专业课小漏洞！</p>
+        `;
+        container.innerHTML = html;
+    }
+
+    // --- 思维导图知识树渲染 ---
     function renderTree(node) {
         let html = `<li class="tree-node" data-id="${node.id}">`;
         html += `<div class="tree-node-content">`;
         html += `<input type="text" value="${node.name}" onchange="updateNodeName(${node.id}, this.value)">`;
         html += `<div class="tree-actions">`;
         html += `<button class="add-btn" onclick="addChildNode(${node.id})">+子节点</button>`;
-        if (node.id !== 1) { // 根节点不可直接删除
+        if (node.id !== 1) {
             html += `<button class="btn-danger" onclick="deleteTreeNode(${node.id})" style="background:#FF3B30; color:white;">删</button>`;
         }
         html += `</div></div>`;
@@ -736,6 +1022,7 @@
 
     function renderTreeContainer() {
         const container = document.getElementById('treeRootContainer');
+        if (!container) return;
         container.innerHTML = `<ul class="tree-list" style="padding-left:0; border-left:none;">${renderTree(subjectTree)}</ul>`;
     }
 
@@ -788,7 +1075,6 @@
         renderTreeContainer();
     }
 
-    // 规范智能查找功能
     function searchNorms() {
         const keyword = document.getElementById('searchInput') ? document.getElementById('searchInput').value.trim().toLowerCase() : '';
         const resultsContainer = document.getElementById('searchResults');
@@ -808,8 +1094,8 @@
 
         filtered.forEach(item => {
             const div = document.createElement('div');
-            div.style.marginBottom = "8px";
-            div.style.paddingBottom = "6px";
+            div.style.marginBottom = "6px";
+            div.style.paddingBottom = "4px";
             div.style.borderBottom = "0.5px solid var(--separator)";
             div.innerHTML = `
                 <div style="font-weight:600; color:var(--text-main);">[${item.category}] ${item.title}</div>
@@ -837,7 +1123,7 @@
     }
 
     function exportDataJSON() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks, subjectTree }, null, 2));
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks, subjectTree, englishErrors, vulnerabilities }, null, 2));
         const a = document.createElement('a');
         a.href = dataStr;
         a.download = "zhuxi_v1_2_1_backup.json";
@@ -855,7 +1141,8 @@
 
     renderDashboard();
     renderTreeContainer();
-    searchNorms();
+    renderEnglishErrors();
+    renderVulnerabilities();
 </script>
 </body>
 </html>
