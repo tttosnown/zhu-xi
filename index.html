@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="筑习">
 <link rel="apple-touch-icon" href="./icon-180.png">
-<meta name="theme-color" content="#F2F2F7">
+<meta name="theme-color" content="#f6f6f3">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <style>
 :root{--bg:#F2F2F7;--card:#FFF;--text:#1C1C1E;--sub:#8E8E93;--line:#C6C6C8;--accent:#007AFF;--green:#34C759;--red:#FF3B30;--r:12px}
@@ -60,6 +60,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .subject-track{height:8px;background:var(--soft,#f2f2f5);border-radius:99px;overflow:hidden}.subject-fill{height:100%;border-radius:99px;background:var(--accent,#c9b5dc)}
 @media(max-width:480px){.study-stat-grid{grid-template-columns:repeat(3,1fr)}.study-stat{padding:8px 4px}.study-stat .num{font-size:18px}}
 </style>
+<style>@media (display-mode: standalone){body{padding-top:env(safe-area-inset-top);}}</style>
 </head>
 <body>
 <header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.6</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" style="display:none" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
