@@ -628,7 +628,6 @@
             d.setDate(monday.getDate() + i);
             let dStr = d.toISOString().split('T')[0];
             let isToday = dStr === todayStr;
-
             let dayTasks = tasks.filter(t => t.date === dStr);
             let dotsHtml = '';
             dayTasks.forEach(dt => {
@@ -795,9 +794,7 @@
         });
         saveData('tasks', tasks);
         renderDashboard();
-    }
-
-    function openRecallModal(id) {
+        function openRecallModal(id) {
         const t = tasks.find(x => x.id === id);
         if (!t) return;
         document.getElementById('modalTitle').innerText = `🧠 主动回忆: ${t.title}`;
@@ -1049,7 +1046,7 @@
     }
 
     function addChildNode(parentId) {
-     findAndExecuteTree(subjectTree, parentId, (node) => {
+        findAndExecuteTree(subjectTree, parentId, (node) => {
             if (!node.children) node.children = [];
             node.children.push({
                 id: Date.now(),
@@ -1147,190 +1144,6 @@
     renderTreeContainer();
     renderEnglishErrors();
     renderVulnerabilities();
-<script>
-    <scripe>
-    <body>
-/**
- * 【筑习增强补丁】英语与专业课复盘：右划出现修改与删除
- * 完美契合移动端/触控习惯，零侵入原有逻辑
- */
-(function() {
-    'use strict';
-
-    window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initSwipePatch, 1000);
-    });
-
-    function initSwipePatch() {
-        console.log("【筑习增强】右划交互模块已加载");
-        setInterval(injectSwipeListeners, 1500);
-    }
-
-    // 扫描并为列表项注入左右滑动与操作按钮结构
-    function injectSwipeListeners() {
-        document.querySelectorAll('div, li').forEach(el => {
-            if (el.dataset.swipePatched) return;
-
-            let text = el.innerText || '';
-            let isEnglishItem = (text.includes('选项辨析') || text.includes('细节定位') || text.includes('长难句理解') || text.includes('熟词僻义')) && !text.includes('记录英语错误');
-            let isProItem = text.includes('未完全掌握') === false && (text.length > 10 && el.querySelectorAll('div').length < 3 && !text.includes('筑习'));
-
-            if ((isEnglishItem || isProItem) && !el.querySelector('.swipe-actions')) {
-                el.dataset.swipePatched = 'true';
-                setupSwipeElement(el, isEnglishItem ? 'english' : 'pro');
-            }
-        });
-    }
-
-    // 为元素包装滑动容器
-    function setupSwipeElement(el, type) {
-        // 确保元素本身可以相对定位，且内容不溢出
-        el.style.position = 'relative';
-        el.style.overflow = 'hidden';
-        el.style.transition = 'transform 0.2s ease';
-
-        // 创建右划露出的绝对定位按钮层
-        let actionsDiv = document.createElement('div');
-        actionsDiv.className = 'swipe-actions';
-        actionsDiv.style.cssText = `
-            position: absolute;
-            top: 0;
-            right: -120px;
-            width: 120px;
-            height: 100%;
-            display: flex;
-            background: #fff;
-            z-index: 10;
-            border-left: 1px solid #eee;
-        `;
-
-        let editBtn = document.createElement('div');
-        editBtn.innerHTML = '编辑';
-        editBtn.style.cssText = 'flex: 1; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;';
-        editBtn.onclick = (e) => {
-            e.stopPropagation();
-            handleEdit(el, type);
-        };
-
-        let deleteBtn = document.createElement('div');
-        deleteBtn.innerHTML = '删除';
-        deleteBtn.style.cssText = 'flex: 1; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            handleDelete(el, type);
-        };
-
-        actionsDiv.appendChild(editBtn);
-        actionsDiv.appendChild(deleteBtn);
-        el.appendChild(actionsDiv);
-
-        // 绑定触控/滑动事件
-        let startX = 0;
-        let currentTranslate = 0;
-        let isOpen = false;
-
-        el.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        }, {passive: true});
-
-        el.addEventListener('touchmove', (e) => {
-            let moveX = e.touches[0].clientX;
-            let diff = moveX - startX;
-            // 右划展示（向左拉动整体向左偏移，露出右侧按钮；或者真正的右划：手指从左往右滑）
-            // 这里适配主流习惯：向左滑动（diff < 0）展开操作按钮
-            if (diff < -20) {
-                el.style.transform = `translateX(-120px)`;
-                isOpen = true;
-            } else if (diff > 20 && isOpen) {
-                el.style.transform = `translateX(0)`;
-                isOpen = false;
-            }
-        }, {passive: true});
-        
-        // 兼容鼠标拖拽（方便在电脑端测试）
-        let isMouseDown = false;
-        let mouseStartX = 0;
-        el.addEventListener('mousedown', (e) => {
-            isMouseDown = true;
-            mouseStartX = e.clientX;
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isMouseDown) return;
-            let diff = e.clientX - mouseStartX;
-            if (diff < -30) {
-                el.style.transform = `translateX(-120px)`;
-                isOpen = true;
-            } else if (diff > 30 && isOpen) {
-                el.style.transform = `translateX(0)`;
-                isOpen = false;
-            }
-        });
-        window.addEventListener('mouseup', () => {
-            isMouseDown = false;
-        });
-    }
-
-    // 修改逻辑
-    function handleEdit(element, type) {
-        let contentText = element.innerText.replace('编辑删除', '').trim();
-        let targetKey = findLocalStorageKey(type);
-        if (!targetKey) return;
-
-        let dataList = JSON.parse(localStorage.getItem(targetKey));
-        if (!Array.isArray(dataList)) return;
-
-        let index = dataList.findIndex(item => {
-            let str = typeof item === 'string' ? item : JSON.stringify(item);
-            return str.includes(contentText.substring(0, 10));
-        });
-
-        if (index === -1) { alert('定位不到记录'); return; }
-
-        let currentVal = typeof dataList[index] === 'string' ? dataList[index] : (dataList[index].content || dataList[index].text);
-        let newVal = prompt('修改内容：', currentVal);
-
-        if (newVal !== null && newVal.trim() !== '') {
-            if (typeof dataList[index] === 'string') {
-                dataList[index] = newVal;
-            } else {
-                dataList[index].content = newVal;
-            }
-            localStorage.setItem(targetKey, JSON.stringify(dataList));
-            location.reload();
-        }
-    }
-
-    // 删除逻辑
-    function handleDelete(element, type) {
-        if (!confirm('确定删除这条复盘吗？')) return;
-        let contentText = element.innerText.replace('编辑删除', '').trim();
-        let targetKey = findLocalStorageKey(type);
-        if (!targetKey) return;
-
-        let dataList = JSON.parse(localStorage.getItem(targetKey));
-        if (!Array.isArray(dataList)) return;
-
-        let index = dataList.findIndex(item => {
-            let str = typeof item === 'string' ? item : JSON.stringify(item);
-            return str.includes(contentText.substring(0, 10));
-        });
-
-        if (index !== -1) {
-            dataList.splice(index, 1);
-            localStorage.setItem(targetKey, JSON.stringify(dataList));
-            location.reload();
-        }
-    }
-
-    function findLocalStorageKey(type) {
-        let keys = Object.keys(localStorage);
-        if (type === 'english') {
-            return keys.find(k => k.includes('english') || k.includes('英语') || k.includes('error') || k.includes('错题') || localStorage.getItem(k).includes('选项辨析'));
-        } else {
-            return keys.find(k => k.includes('zhuanye') || k.includes('专业') || k.includes('漏洞') || localStorage.getItem(k).includes('细节点'));
-        }
-    }
-})();
 </script>
-</html>   
-            
+</body>
+    }
