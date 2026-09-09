@@ -2,659 +2,445 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>筑习 - 建筑考研学习系统 v1.2.1</title>
-    <link rel="manifest" href="./manifest.webmanifest">
-    <meta name="theme-color" content="#F2F2F7">
-    <link rel="apple-touch-icon" href="./icon-180.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑与消防规范知识树系统</title>
     <style>
         :root {
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --text-main: #1C1C1E;
-            --text-sub: #8E8E93;
-            --separator: #C6C6C8;
-            --accent: #007AFF;
-            --radius: 12px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.05);
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #333333;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 90px;
-            max-width: 600px;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         header {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 16px 20px;
-            border-bottom: 0.5px solid var(--separator);
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
         }
 
-        .container {
-            padding: 16px;
+        header p {
+            color: #666;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-            border: 0.5px solid rgba(0,0,0,0.04);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
         }
 
         .card h2 {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            letter-spacing: -0.2px;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
         }
 
-        /* 颜色色块 Routine 样式 */
-        .routine-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .routine-day {
-            background: #FAFAFC;
-            border-radius: 8px;
-            padding: 8px 4px;
-            text-align: center;
-            font-size: 11px;
-            border: 0.5px solid var(--separator);
-            cursor: pointer;
-        }
-        .routine-day.today {
-            border-color: var(--accent);
-            background: #F0F6FF;
-        }
-        .routine-day .d-name {
-            color: var(--text-sub);
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-        .routine-day.today .d-name { color: var(--accent); font-weight: 600; }
-        
-        .color-dots-container {
+        /* 规范查找部分样式 */
+        .search-box {
             display: flex;
-            justify-content: center;
-            gap: 3px;
-            flex-wrap: wrap;
-            min-height: 12px;
-            margin-top: 4px;
-        }
-        .task-color-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-        }
-
-        /* 学科颜色定义 */
-        .dot-建筑史 { background: #AF52DE; }
-        .dot-建筑理论 { background: #5856D6; }
-        .dot-建筑物理 { background: #007AFF; }
-        .dot-构造技术 { background: #34C759; }
-        .dot-英语 { background: #FF9500; }
-        .dot-政治 { background: #FF3B30; }
-        .dot-通用 { background: #8E8E93; }
-
-        /* 任务列表 */
-        .task-item {
-            background: #FAFAFC;
-            padding: 12px;
-            border-radius: 10px;
-            border: 0.5px solid var(--separator);
-            margin-bottom: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .task-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .task-info {
-            display: flex;
-            align-items: center;
             gap: 10px;
-            flex: 1;
-        }
-        .badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #E5E5EA;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-        .delete-btn {
-            background: #FF3B30;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            cursor: pointer;
+            margin-bottom: 16px;
         }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 0.5px solid var(--separator);
-            background: #F9F9FB;
-            font-size: 14px;
-            margin-bottom: 10px;
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
             outline: none;
+            transition: border-color 0.2s;
         }
-        input:focus, textarea:focus { border-color: var(--accent); background: #FFF; }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+        }
 
         .btn {
-            background: var(--accent);
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn:active { opacity: 0.8; }
-        .btn-secondary {
-            background: #E5E5EA;
-            color: var(--text-main);
-        }
-        .btn-small {
-            padding: 4px 10px;
-            font-size: 12px;
-            width: auto;
-        }
-
-        /* 月历视图样式 */
-        .month-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-top: 8px;
-        }
-        .month-cell {
-            background: #FAFAFC;
+            padding: 10px 20px;
             border-radius: 6px;
-            padding: 6px 2px;
-            text-align: center;
-            font-size: 11px;
-            border: 0.5px solid var(--separator);
-            min-height: 45px;
             cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
         }
-        .month-cell.has-task { background: #FFFFFF; }
 
-        /* 模态框 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
+        .btn:hover {
+            background-color: #2980b9;
         }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: #FFF;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 450px;
-            max-height: 85vh;
+
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .search-results {
+            max-height: 300px;
             overflow-y: auto;
-            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
         }
 
-        nav.tab-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .result-desc {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        /* 知识树思维导图无限叠加样式 */
+        .tree-container {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        ul.tree-list {
+            list-style-type: none;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        ul.tree-list::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            border-left: 2px dashed #cbd5e1;
+        }
+
+        .tree-node {
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .tree-node-content {
             display: flex;
-            justify-content: space-around;
-            padding: 8px 0 20px 0;
-            border-top: 0.5px solid var(--separator);
-            z-index: 1000;
-            max-width: 600px;
-            margin: 0 auto;
+            align-items: center;
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            width: fit-content;
         }
-        .tab-item {
-            text-align: center;
-            font-size: 10px;
-            color: var(--text-sub);
-            cursor: pointer;
-            flex: 1;
-        }
-        .tab-item.active { color: var(--accent); font-weight: 600; }
-        .tab-item span { display: block; font-size: 18px; margin-bottom: 2px; }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tree-node-content input[type="text"] {
+            border: 1px solid transparent;
+            background: transparent;
+            font-size: 0.95rem;
+            outline: none;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .tree-node-content input[type="text"]:focus {
+            background: white;
+            border-color: var(--accent-color);
+        }
+
+        .tree-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tree-actions button {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            background: #cbd5e1;
+            color: #333;
+        }
+
+        .tree-actions button:hover {
+            background: #94a3b8;
+            color: white;
+        }
+
+        .tree-actions button.add-btn {
+            background: #2ecc71;
+            color: white;
+        }
+        .tree-actions button.add-btn:hover {
+            background: #27ae60;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>
-        <span>筑习 <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">v1.2.1</span></span>
-        <button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button>
-    </h1>
-</header>
-
 <div class="container">
-    <!-- TAB 1: 首页 Routine 与 累计月历 -->
-    <div id="tab-dashboard" class="tab-content active">
-        <div class="card">
-            <h2>📅 本周 Routine 色块看板 
-                <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">点击日期查看详情</span>
-            </h2>
-            <div class="routine-grid" id="routineGridContainer"></div>
-        </div>
+    <header>
+        <h1>建筑防火与无障碍规范知识树系统</h1>
+        <p>支持无限向下分支叠加的思维导图知识管理与国标规范智能检索工具</p>
+    </header>
 
-        <div class="card">
-            <h2>📈 累计学习与月历全景 
-                <span style="font-size:12px; color:var(--text-sub);" id="currentMonthTitle"></span>
-            </h2>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-sub); margin-bottom:4px;">
-                <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    <!-- 模块二：规范查找部分 -->
+    <div class="card">
+        <h2>建筑消防与无障碍规范智能查找</h2>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="请输入关键字查找（例如：防火分区、疏散、无障碍、坡道、消火栓...）">
+            <button class="btn" onclick="searchNorms()">查找规范</button>
+        </div>
+        <div class="search-results" id="searchResults">
+            <div class="result-item">
+                <div class="result-desc" style="color: #888; text-align: center;">请输入关键词或点击查找以检索中国国家最新建筑防火与无障碍规范条文。</div>
             </div>
-            <div class="month-grid" id="monthGridContainer"></div>
-        </div>
-
-        <div class="card">
-            <h2>今日任务清单 
-                <button class="btn btn-small" onclick="openAddTaskModal()">+ 添加任务</button>
-            </h2>
-            <div id="taskListContainer"></div>
         </div>
     </div>
 
-    <!-- TAB 2: 学科知识树 -->
-    <div id="tab-tree" class="tab-content">
-        <div class="card">
-            <h2>🌳 学科与章节知识树
-                <button class="btn btn-small" onclick="addCustomChapterNode()">+ 添加</button>
-            </h2>
-            <div id="subjectTreeContainer"></div>
-        </div>
-    </div>
-
-    <!-- TAB 3: 规范与复习 -->
-    <div id="tab-review" class="tab-content">
-        <div class="card">
-            <h2>🏛️ 每日建筑规范抽查</h2>
-            <div style="background: #F9F9FB; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 0.5px solid var(--separator);">
-                <p id="codeQTitle" style="font-weight: 600; font-size:13px; margin-bottom: 4px;"></p>
-                <p id="codeQContent" style="font-size: 13px; margin-bottom: 8px;"></p>
-                <button class="btn btn-small btn-secondary" onclick="toggleCodeAnswer()">查看解析</button>
-                <div id="codeQAnswer" style="display:none; margin-top: 8px; padding-top: 8px; border-top: 0.5px dashed var(--separator); font-size: 13px; color: #34C759;"></div>
-            </div>
-            <button class="btn btn-secondary" onclick="loadDailyCodeQuestion()">换一题</button>
-        </div>
-    </div>
-
-    <!-- TAB 4: 设置 -->
-    <div id="tab-settings" class="tab-content">
-        <div class="card">
-            <h2>⚙️ 系统设置</h2>
-            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 10px;">所有打卡与历史数据均在本地安全累计存储。</p>
-            <button class="btn btn-secondary" onclick="simulate2000Reminder()" style="margin-bottom: 10px;">🔔 测试 20:00 晚间提醒</button>
-            <button class="btn btn-secondary" onclick="clearAllData()" style="color: #FF3B30;">🗑️ 清空所有数据</button>
+    <!-- 模块一：知识树板块 -->
+    <div class="card">
+        <h2>知识树管理（思维导图模式）</h2>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">提示：您可以点击节点文本进行修改，通过“+子节点”无限向下扩展分支，或进行删除。</p>
+        <div class="tree-container" id="treeRootContainer">
+            <!-- 动态渲染的树状结构 -->
         </div>
     </div>
 </div>
-
-<!-- 详细任务/主动回忆弹窗 -->
-<div id="taskModal" class="modal">
-    <div class="modal-content">
-        <h2 id="modalTitle" style="margin-bottom: 10px;">任务详情与主动回忆</h2>
-        <div id="modalBody"></div>
-        <button class="btn btn-secondary" onclick="closeTaskModal()" style="margin-top: 15px;">关闭</button>
-    </div>
-</div>
-
-<nav class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('dashboard', this)"><span>📅</span>看板</div>
-    <div class="tab-item" onclick="switchTab('tree', this)"><span>🌳</span>知识树</div>
-    <div class="tab-item" onclick="switchTab('review', this)"><span>🏛️</span>规范</div>
-    <div class="tab-item" onclick="switchTab('settings', this)"><span>⚙️</span>设置</div>
-</nav>
 
 <script>
-    function getData(key, defaultVal) {
-        const val = localStorage.getItem('zhuxi_v1_2_' + key);
-        return val ? JSON.parse(val) : defaultVal;
-    }
-    function saveData(key, val) {
-        localStorage.setItem('zhuxi_v1_2_' + key, JSON.stringify(val));
-    }
-
-    const subjects = ["建筑史", "建筑理论", "建筑物理", "构造技术", "英语", "政治"];
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    const defaultTasks = [
-        { id: 1, title: "拜占庭建筑核心特征与圣索菲亚大教堂", subject: "建筑史", date: todayStr, completed: false, mastery: 40 },
-        { id: 2, title: "英语真题阅读长难句精析", subject: "英语", date: todayStr, completed: false, mastery: 60 },
-        { id: 3, title: "公共建筑安全出口与疏散距离", subject: "建筑物理", date: todayStr, completed: true, mastery: 90 },
-        { id: 4, title: "政治马哲核心原理辨析", subject: "政治", date: todayStr, completed: false, mastery: 50 }
+    // 中国国家最新建筑消防防火与无障碍规范核心数据库
+    const nationalNormsDatabase = [
+        {
+            title: "《建筑防火通用规范》 GB 55037-2022",
+            category: "防火通用",
+            content: "自2023年6月1日起实施，为强制性工程建设规范，全部条文必须严格执行。涵盖了建筑分类、耐火等级、总平面布局、防火分区、平面布置、安全疏散、建筑构造及灭火救援设施等底线要求。"
+        },
+        {
+            title: "《消防设施通用规范》 GB 55036-2022",
+            category: "消防设施",
+            content: "自2023年3月1日起实施，为强制性工程建设规范。规范了室内外消火栓系统、自动灭火系统、火灾自动报警系统、防烟排烟设施以及消防应急照明和疏散指示标志的设置标准。"
+        },
+        {
+            title: "《建筑设计防火规范》 GB 50016-2014（2018年版）",
+            category: "建筑防火",
+            content: "规定了厂房、仓库、民用建筑的耐火等级、防火间距、防火分区（如一、二级民用建筑每个防火分区最大允许建筑面积通常不宜超过2500平方米）、安全疏散距离及宽度指标。"
+        },
+        {
+            title: "《建筑与市政工程无障碍通用规范》 GB 55019-2021",
+            category: "无障碍规范",
+            content: "强制性工程建设规范。明确了无障碍通道、轮椅坡道（坡度不应大于1:12，高度较大时应采用缓坡）、无障碍出入口、无障碍电梯、无障碍厕所及无障碍停车位的具体设置标准。"
+        },
+        {
+            title: "无障碍坡道与台阶设计细则",
+            category: "无障碍细节",
+            content: "无障碍轮椅坡道净宽度不应小于1.00m，起点和终点应设置轮椅回转面积不小于1.50m×1.50m的平缓休息平台；坡道两侧应设置高度不小于0.90m的扶手，且扶手应首尾连贯。"
+        },
+        {
+            title: "消防车道与救援场地设置要求",
+            category: "消防救援",
+            content: "高层建筑应设置环形消防车道，或沿建筑的一个长边设置消防车道；消防车道的净宽度和净空高度均不应小于4.0m，转弯半径应满足消防车转弯作业需求。"
+        }
     ];
 
-    const defaultTree = [
-        { id: 1, subject: "建筑史", chapter: "第一章 中国古代建筑史", nodes: ["木构架演变", "唐宋清官式做法"] },
-        { id: 2, subject: "建筑理论", chapter: "第二章 空间组合理论", nodes: ["柯布西耶五原则", "路易·康空间"] }
-    ];
+    // 规范查找功能
+    function searchNorms() {
+        const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+        const resultsContainer = document.getElementById('searchResults');
+        resultsContainer.innerHTML = '';
 
-    // 扩充规范题库，确保“换一题”有多道题目可供随机切换
-    const codeBank = [
-        { title: "《建筑设计防火规范》GB 50016", content: "高层民用建筑内防火分区之间的防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" },
-        { title: "《民用建筑设计统一标准》GB 50352", content: "严寒和寒冷地区公共建筑的体形系数应如何控制以满足节能要求？", answer: "应严格控制体形系数，一般不宜大于 0.30。" },
-        { title: "《建筑抗震设计规范》GB 50011", content: "多层砌体房屋抗震墙设置中，横墙间距不宜超过多少米？", answer: "一般不宜大于房宽的 2.5 倍或规范规定限值。" },
-        { title: "《公共建筑节能设计标准》GB 50189", content: "建筑东、西朝向窗墙比不应大于多少？", answer: "不应大于 0.30。" }
-    ];
+        const filtered = nationalNormsDatabase.filter(item => 
+            item.title.toLowerCase().includes(keyword) || 
+            item.content.toLowerCase().includes(keyword) ||
+            item.category.toLowerCase().includes(keyword)
+        );
 
-    let tasks = getData('tasks', defaultTasks);
-    let subjectTree = getData('tree', defaultTree);
-
-    function switchTab(tabId, el) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        el.classList.add('active');
-        if (tabId === 'dashboard') renderDashboard();
-        if (tabId === 'tree') renderSubjectTree();
-        if (tabId === 'review') loadDailyCodeQuestion();
-    }
-
-    function renderDashboard() {
-        renderRoutineGrid();
-        renderMonthGrid();
-        renderTasksList();
-    }
-
-    function renderRoutineGrid() {
-        const container = document.getElementById('routineGridContainer');
-        const curr = new Date();
-        const dayOfWeek = curr.getDay() || 7; 
-        const monday = new Date(curr);
-        monday.setDate(curr.getDate() - dayOfWeek + 1);
-
-        const daysName = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-        let html = '';
-        
-        for (let i = 0; i < 7; i++) {
-            let d = new Date(monday);
-            d.setDate(monday.getDate() + i);
-            let dStr = d.toISOString().split('T')[0];
-            let isToday = dStr === todayStr;
-
-            let dayTasks = tasks.filter(t => t.date === dStr);
-            let dotsHtml = '';
-            dayTasks.forEach(dt => {
-                dotsHtml += `<div class="task-color-dot dot-${dt.subject}" title="${dt.subject}: ${dt.title}"></div>`;
-            });
-
-            html += `
-            <div class="routine-day ${isToday ? 'today' : ''}" onclick="openDayDetail('${dStr}')">
-                <div class="d-name">${daysName[i]}</div>
-                <div style="font-size:10px; color:var(--text-sub);">${d.getDate()}</div>
-                <div class="color-dots-container">${dotsHtml}</div>
-            </div>`;
-        }
-        container.innerHTML = html;
-    }
-
-    function renderMonthGrid() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        document.getElementById('currentMonthTitle').innerText = `${year}年${month + 1}月`;
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const offset = firstDay === 0 ? 6 : firstDay - 1; 
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        let html = '';
-        for (let i = 0; i < offset; i++) {
-            html += `<div class="month-cell" style="opacity:0.3;"></div>`;
-        }
-        for (let day = 1; day <= daysInMonth; day++) {
-            let mStr = (month + 1).toString().padStart(2, '0');
-            let dStrNum = day.toString().padStart(2, '0');
-            let dStr = `${year}-${mStr}-${dStrNum}`;
-            let dayTasks = tasks.filter(t => t.date === dStr);
-            
-            let dotsHtml = '';
-            dayTasks.forEach(dt => {
-                dotsHtml += `<div class="task-color-dot dot-${dt.subject}" style="width:5px;height:5px;display:inline-block;margin:1px;"></div>`;
-            });
-
-            html += `
-            <div class="month-cell ${dayTasks.length > 0 ? 'has-task' : ''}" onclick="openDayDetail('${dStr}')">
-                <div style="font-weight:600;">${day}</div>
-                <div>${dotsHtml}</div>
-            </div>`;
-        }
-        document.getElementById('monthGridContainer').innerHTML = html;
-    }
-
-    function openDayDetail(dateStr) {
-        const dayTasks = tasks.filter(t => t.date === dateStr);
-        document.getElementById('modalTitle').innerText = `📅 日期详情: ${dateStr}`;
-        let html = `<p style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">该日共有 ${dayTasks.length} 项任务记录：</p>`;
-        
-        if (dayTasks.length === 0) {
-            html += `<p style="font-size:13px; color:var(--text-sub);">当天无打卡记录。</p>`;
-        } else {
-            dayTasks.forEach(t => {
-                html += `
-                <div style="background:#F9F9FB; padding:8px; border-radius:6px; margin-bottom:6px; border:0.5px solid var(--separator);">
-                    <span class="badge">${t.subject}</span> <span style="font-size:13px; font-weight:500;">${t.title}</span>
-                    <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">状态: ${t.completed ? '已完成' : '未完成'} | 掌握率: ${t.mastery || 50}%</div>
-                </div>`;
-            });
-        }
-        document.getElementById('modalBody').innerHTML = html;
-        document.getElementById('taskModal').classList.add('active');
-    }
-
-    function closeTaskModal() {
-        document.getElementById('taskModal').classList.remove('active');
-    }
-
-    function renderTasksList() {
-        const container = document.getElementById('taskListContainer');
-        const todayTasks = tasks.filter(t => t.date === todayStr);
-        if (todayTasks.length === 0) {
-            container.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">今日暂无任务，请添加。</p>';
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = `<div class="result-item"><div class="result-desc" style="color: #e74c3c;">未找到与“${keyword}”相关的最新国家规范条文，请尝试其他关键词（如：防火分区、无障碍、消火栓）。</div></div>`;
             return;
         }
-        let html = '';
-        todayTasks.forEach(t => {
-            const isRecalledSubject = ["建筑史", "建筑理论", "建筑物理", "构造技术"].includes(t.subject);
-            html += `
-            <div class="task-item">
-                <div class="task-row">
-                    <div class="task-info">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" style="width:16px;height:16px;margin:0;">
-                        <div>
-                            <span style="font-size:13px; font-weight:500; ${t.completed ? 'text-decoration:line-through;color:var(--text-sub);' : ''}">${t.title}</span>
-                            <div style="margin-top:2px; display:flex; gap:6px; align-items:center;">
-                                <span class="badge">${t.subject}</span>
-                                <span style="font-size:11px; color:var(--text-sub);">掌握率: ${t.mastery || 50}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:4px;">
-                        ${isRecalledSubject ? `<button class="btn btn-small" onclick="openRecallModal(${t.id})">回忆</button>` : ''}
-                        <button class="delete-btn" onclick="deleteTask(${t.id})">删</button>
-                    </div>
-                </div>
-            </div>`;
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+                <div class="result-title">[${item.category}] ${item.title}</div>
+                <div class="result-desc">${item.content}</div>
+            `;
+            resultsContainer.appendChild(div);
         });
-        container.innerHTML = html;
     }
 
-    function toggleTask(id) {
-        tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
-        saveData('tasks', tasks);
-        renderDashboard();
-    }
+    // 初始知识树数据（支持无限向下叠加结构）
+    let knowledgeTreeData = {
+        id: 1,
+        name: "建筑消防与无障碍知识体系",
+        children: [
+            {
+                id: 2,
+                name: "建筑防火规范",
+                children: [
+                    { id: 5, name: "防火分区与分隔", children: [] },
+                    { id: 6, name: "安全疏散设计", children: [] }
+                ]
+            },
+            {
+                id: 3,
+                name: "消防设施配置",
+                children: [
+                    { id: 7, name: "自动喷水灭火系统", children: [] },
+                    { id: 8, name: "火灾自动报警系统", children: [] }
+                ]
+            },
+            {
+                id: 4,
+                name: "无障碍设计规范",
+                children: [
+                    { id: 9, name: "无障碍出入口与通道", children: [] },
+                    { id: 10, name: "轮椅坡道与扶手", children: [] }
+                ]
+            }
+        ]
+    };
 
-    function deleteTask(id) {
-        if (confirm('确认删除？')) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveData('tasks', tasks);
-            renderDashboard();
+    // 渲染知识树递归函数
+    function renderTree(node) {
+        let html = `<li class="tree-node" data-id="${node.id}">`;
+        html += `<div class="tree-node-content">`;
+        html += `<input type="text" value="${node.name}" onchange="updateNodeName(${node.id}, this.value)">`;
+        html += `<div class="tree-actions">`;
+        html += `<button class="add-btn" onclick="addChildNode(${node.id})">+子节点</button>`;
+        if (node.id !== 1) { // 根节点不允许直接删除
+            html += `<button class="btn-danger" onclick="deleteNode(${node.id})">删除</button>`;
         }
-    }
+        html += `</div></div>`;
 
-    function openAddTaskModal() {
-        const title = prompt('任务名称：', '古希腊柱式复习');
-        if (!title) return;
-        const sub = prompt('科目 (建筑史/建筑理论/建筑物理/构造技术/英语/政治)：', '建筑史');
-        
-        tasks.push({
-            id: Date.now(),
-            title: title,
-            subject: subjects.includes(sub) ? sub : '通用',
-            date: todayStr,
-            completed: false,
-            mastery: 50
-        });
-        saveData('tasks', tasks);
-        renderDashboard();
-    }
-
-    function openRecallModal(id) {
-        const t = tasks.find(x => x.id === id);
-        if (!t) return;
-        document.getElementById('modalTitle').innerText = `🧠 主动回忆: ${t.title}`;
-        
-        let html = `<p style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">请针对以下 5 个专业考点进行主动回忆：</p>`;
-        for (let i = 1; i <= 5; i++) {
-            html += `<textarea rows="2" placeholder="考点 ${i} 回忆内容..." style="margin-bottom:6px;"></textarea>`;
-        }
-        html += `
-        <div style="margin-top:10px;">
-            <p style="font-size:12px; margin-bottom:6px;">自评掌握度：</p>
-            <div style="display:flex; gap:6px;">
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 90)">🟢 熟练</button>
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 60)">🟡 一般</button>
-                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 30)">🔴 遗忘</button>
-            </div>
-        </div>`;
-        document.getElementById('modalBody').innerHTML = html;
-        document.getElementById('taskModal').classList.add('active');
-    }
-
-    function updateMastery(id, score) {
-        tasks = tasks.map(t => t.id === id ? {...t, mastery: score, completed: true} : t);
-        saveData('tasks', tasks);
-        closeTaskModal();
-        renderDashboard();
-        alert('掌握率已更新！');
-    }
-
-    function renderSubjectTree() {
-        const container = document.getElementById('subjectTreeContainer');
-        let html = '';
-        subjects.forEach(sub => {
-            const chs = subjectTree.filter(item => item.subject === sub);
-            html += `<div style="margin-bottom:12px;"><span class="badge" style="font-size:12px;">${sub}</span>`;
-            if (chs.length === 0) html += `<p style="font-size:12px; color:var(--text-sub); margin-top:4px;">暂无章节</p>`;
-            chs.forEach(c => {
-                html += `<div style="margin-left:10px; margin-top:4px; font-size:13px; font-weight:500;">▪ ${c.chapter}</div>`;
+        if (node.children && node.children.length > 0) {
+            html += `<ul class="tree-list">`;
+            node.children.forEach(child => {
+                html += renderTree(child);
             });
-            html += `</div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    function addCustomChapterNode() {
-        const sub = prompt('选择科目 (建筑史/建筑理论/建筑物理/构造技术/英语/政治)：', '建筑史');
-        if (!subjects.includes(sub)) return alert('学科错误');
-        const chap = prompt('章节名称：', '第三章 现代建筑');
-        if (!chap) return;
-        subjectTree.push({ id: Date.now(), subject: sub, chapter: chap, nodes: [] });
-        saveData('tree', subjectTree);
-        renderSubjectTree();
-    }
-
-    // 随机切换建筑规范题
-    function loadDailyCodeQuestion() {
-        const q = codeBank[Math.floor(Math.random() * codeBank.length)];
-        document.getElementById('codeQTitle').innerText = q.title;
-        document.getElementById('codeQContent').innerText = q.content;
-        document.getElementById('codeQAnswer').innerText = '解析: ' + q.answer;
-        document.getElementById('codeQAnswer').style.display = 'none';
-    }
-
-    function toggleCodeAnswer() {
-        const b = document.getElementById('codeQAnswer');
-        b.style.display = b.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function simulate2000Reminder() {
-        alert('⏰ 【20:00 晚间提醒】今日任务进展顺利，请查收累积打卡！');
-    }
-
-    function exportDataJSON() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks, subjectTree }, null, 2));
-        const a = document.createElement('a');
-        a.href = dataStr;
-        a.download = "zhuxi_v1_2_1_backup.json";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    }
-
-    function clearAllData() {
-        if (confirm('确定清空所有累计数据吗？')) {
-            localStorage.clear();
-            location.reload();
+            html += `</ul>`;
         }
+        html += `</li>`;
+        return html;
     }
 
-    renderDashboard();
+    function renderTreeContainer() {
+        const container = document.getElementById('treeRootContainer');
+        container.innerHTML = `<ul class="tree-list" style="padding-left:0; border-left:none;">${renderTree(knowledgeTreeData)}</ul>`;
+    }
+
+    // 查找节点辅助函数
+    function findAndExecute(node, id, callback) {
+        if (node.id === id) {
+            return callback(node);
+        }
+        if (node.children) {
+            for (let i = 0; i < node.children.length; i++) {
+                const res = findAndExecute(node.children[i], id, callback);
+                if (res) return res;
+            }
+        }
+        return null;
+    }
+
+    // 更新节点名称
+    function updateNodeName(id, newName) {
+        findAndExecute(knowledgeTreeData, id, (node) => {
+            node.name = newName;
+        });
+    }
+
+    // 添加子节点（实现无限向下叠加）
+    function addChildNode(parentId) {
+        findAndExecute(knowledgeTreeData, parentId, (node) => {
+            if (!node.children) {
+                node.children = [];
+            }
+            const newId = Date.now(); // 生成唯一ID
+            node.children.push({
+                id: newId,
+                name: "新建分支节点",
+                children: []
+            });
+        });
+        renderTreeContainer();
+    }
+
+    // 删除节点
+    function deleteNode(id) {
+        function removeRecursive(node, targetId) {
+            if (!node.children) return false;
+            const index = node.children.findIndex(c => c.id === targetId);
+            if (index !== -1) {
+                node.children.splice(index, 1);
+                return true;
+            }
+            for (let i = 0; i < node.children.length; i++) {
+                if (removeRecursive(node.children[i], targetId)) return true;
+            }
+            return false;
+        }
+        removeRecursive(knowledgeTreeData, id);
+        renderTreeContainer();
+    }
+
+    // 页面加载完成后初始化渲染树
+    window.onload = function() {
+        renderTreeContainer();
+        searchNorms(); // 默认展示部分规范
+    };
 </script>
+
 </body>
 </html>
