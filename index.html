@@ -1149,73 +1149,72 @@
 </script>
 <script>
 /**
- * 【筑习终极修复补丁】全自动检索与修改/删除底层逻辑
- * 完美适配单文件应用的嵌套状态存储结构
+ * 【筑习最终精简修复版】精准定位，绝不污染界面
  */
 (function() {
     'use strict';
 
     window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initUltimatePatch, 1000);
+        setTimeout(initCleanPatch, 1000);
     });
 
-    function initUltimatePatch() {
-        console.log("【筑习终极补丁】已加载，准备接管复盘项操作");
-        setInterval(injectDirectButtons, 1500);
+    function initCleanPatch() {
+        // 先清理一遍之前可能残留的错误按钮
+        document.querySelectorAll('.ultimate-btn-group').forEach(el => el.remove());
+        setInterval(injectCleanButtons, 2000);
     }
 
-    // 在每一个具体的复盘项旁边直接注入醒目的修改和删除按钮（省去复杂的滑动，确保100%点得到、改得了）
-    function injectDirectButtons() {
-        document.querySelectorAll('div, li').forEach(el => {
-            if (el.dataset.ultimatePatched) return;
+    function injectCleanButtons() {
+        // 只精确扫描包含复盘特征文字的叶子节点或最小容器，避免大范围污染
+        document.querySelectorAll('div, li, p').forEach(el => {
+            // 如果已经注入过了，跳过
+            if (el.dataset.cleanPatched === 'true' || el.querySelector('.ultimate-btn-group')) return;
 
             let text = el.innerText || '';
-            // 识别英语复盘或专业课漏洞的条目
-            let isEnglish = (text.includes('选项辨析') || text.includes('细节定位') || text.includes('长难句理解') || text.includes('熟词僻义') || text.includes('词义')) && !text.includes('记录英语错误');
-            let isPro = text.includes('未完全掌握') === false && (text.length > 6 && el.querySelectorAll('div').length < 2 && !text.includes('筑习') && (el.parentElement && (el.parentElement.innerHTML.includes('专业') || el.parentElement.innerHTML.includes('漏洞') || el.parentElement.innerHTML.includes('细节点'))));
+            
+            // 确保它是具体的某一条复盘内容（字数在一定范围内，且包含英语错题分类或专业漏洞特征）
+            let isEnglishItem = (text.includes('选项辨析') || text.includes('细节定位') || text.includes('长难句理解') || text.includes('熟词僻义') || text.includes('词义')) && !text.includes('记录英语错误');
+            let isProItem = (text.includes('未完全掌握') === false) && (text.length > 5 && text.length < 150) && (el.children.length === 0 || el.children.length === 1) && (text.includes('考点') || text.includes('漏洞') || text.includes('细节点') || text.includes('知识'));
 
-            if ((isEnglish || isPro) && !el.querySelector('.ultimate-btn-group')) {
-                el.dataset.ultimatePatched = 'true';
-                appendButtons(el, text);
+            if (isEnglishItem || isProItem) {
+                // 标记已处理
+                el.dataset.cleanPatched = 'true';
+                
+                // 创建一个极简、不占地方的操作栏
+                let btnDiv = document.createElement('div');
+                btnDiv.className = 'ultimate-btn-group';
+                btnDiv.style.cssText = 'margin-top: 4px; display: flex; gap: 12px; font-size: 11px; opacity: 0.8;';
+                
+                let editSpan = document.createElement('span');
+                editSpan.innerHTML = '✏️ 修改';
+                editSpan.style.cssText = 'color: #2563eb; cursor: pointer;';
+                editSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    modifyData(text, 'edit');
+                };
+
+                let delSpan = document.createElement('span');
+                delSpan.innerHTML = '🗑️ 删除';
+                delSpan.style.cssText = 'color: #dc2626; cursor: pointer;';
+                delSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    modifyData(text, 'delete');
+                };
+
+                btnDiv.appendChild(editSpan);
+                btnDiv.appendChild(delSpan);
+                el.appendChild(btnDiv);
             }
         });
     }
 
-    function appendButtons(container, originalText) {
-        let btnDiv = document.createElement('div');
-        btnDiv.className = 'ultimate-btn-group';
-        btnDiv.style.cssText = 'margin-top: 6px; padding-top: 4px; border-top: 1px dashed #ddd; display: flex; gap: 15px; font-size: 12px;';
-        
-        let editSpan = document.createElement('span');
-        editSpan.innerHTML = '✏️ 修改';
-        editSpan.style.cssText = 'color: #2563eb; cursor: pointer; font-weight: bold;';
-        editSpan.onclick = (e) => {
-            e.stopPropagation();
-            modifyLocalStorageData(originalText, 'edit');
-        };
-
-        let delSpan = document.createElement('span');
-        delSpan.innerHTML = '🗑️ 删除';
-        delSpan.style.cssText = 'color: #dc2626; cursor: pointer; font-weight: bold;';
-        delSpan.onclick = (e) => {
-            e.stopPropagation();
-            modifyLocalStorageData(originalText, 'delete');
-        };
-
-        btnDiv.appendChild(editSpan);
-        btnDiv.appendChild(delSpan);
-        container.appendChild(btnDiv);
-    }
-
-    // 核心：全网盘/全LocalStorage深度搜索并修改数据
-    function modifyLocalStorageData(targetText, action) {
-        // 清理掉按钮文本的影响
-        let cleanTarget = targetText.replace('✏️ 修改', '').replace('🗑️ 删除', '').trim();
-        let keyword = cleanTarget.substring(0, 8); // 提取前8个字符作为特征码
+    function modifyData(rawText, action) {
+        // 剥离掉按钮自身的文字
+        let cleanTarget = rawText.replace('✏️ 修改', '').replace('🗑️ 删除', '').trim();
+        let keyword = cleanTarget.substring(0, 6); // 取前6个核心字作为匹配码
 
         let matched = false;
 
-        // 遍历浏览器的 localStorage 每一个 key
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             let rawValue = localStorage.getItem(key);
@@ -1223,7 +1222,7 @@
             try {
                 let parsed = JSON.parse(rawValue);
                 
-                // 情况A：这个 key 对应的值本身就是个数组
+                // 处理数组形式的数据
                 if (Array.isArray(parsed)) {
                     let index = parsed.findIndex(item => {
                         let itemStr = typeof item === 'string' ? item : JSON.stringify(item);
@@ -1235,7 +1234,6 @@
                             if (confirm('确定要删除这条记录吗？')) {
                                 parsed.splice(index, 1);
                                 localStorage.setItem(key, JSON.stringify(parsed));
-                                alert('删除成功！');
                                 location.reload();
                             }
                         } else if (action === 'edit') {
@@ -1248,14 +1246,13 @@
                                     parsed[index].content = newVal;
                                 }
                                 localStorage.setItem(key, JSON.stringify(parsed));
-                                alert('修改成功！');
                                 location.reload();
                             }
                         }
                         return;
                     }
                 } 
-                // 情况B：这个 key 对应的值是个对象，里面可能嵌套了数组（比如大前端应用常见的 state 对象）
+                // 处理嵌套对象形式的数据
                 else if (parsed && typeof parsed === 'object') {
                     for (let prop in parsed) {
                         if (Array.isArray(parsed[prop])) {
@@ -1269,7 +1266,6 @@
                                     if (confirm('确定要删除这条记录吗？')) {
                                         parsed[prop].splice(index, 1);
                                         localStorage.setItem(key, JSON.stringify(parsed));
-                                        alert('删除成功！');
                                         location.reload();
                                     }
                                 } else if (action === 'edit') {
@@ -1282,7 +1278,6 @@
                                             parsed[prop][index].content = newVal;
                                         }
                                         localStorage.setItem(key, JSON.stringify(parsed));
-                                        alert('修改成功！');
                                         location.reload();
                                     }
                                 }
@@ -1291,13 +1286,11 @@
                         }
                     }
                 }
-            } catch (err) {
-                // 忽略解析失败的非 JSON 键
-            }
+            } catch (err) {}
         }
 
         if (!matched) {
-            alert('未能在本地数据库中精准定位该条记录，请尝试刷新页面后重试。');
+            alert('未能在本地数据库中找到该条记录。');
         }
     }
 })();
