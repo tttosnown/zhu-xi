@@ -7,7 +7,6 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <meta name="theme-color" content="#D1C4E9">
     <link rel="apple-touch-icon" href="./icon-180.png">
-    <script src="./code-bank-adapter.js"></script>
     <style>
         :root {
             --bg-color: #FAF8F5;
@@ -110,7 +109,6 @@
             font-size: 14px;
         }
         .status-done { color: #4CAF50; font-weight: bold; }
-        .status-todo { color: #FF9800; }
         .status-none { color: #BDBDBD; }
 
         .task-item-wrapper {
@@ -282,10 +280,11 @@
 </header>
 
 <div class="container">
+    <!-- TAB 1: 看板与任务 -->
     <div id="tab-dashboard" class="tab-content active">
         <div class="card">
             <h2>本周学习日历 <span>📅</span></h2>
-            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">每天学习状态一目了然 (● 已完成 | ⚪ 未完成 | — 无任务)</p>
+            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">每天学习状态 (● 已完成 | ⚪ 未完成)</p>
             <div class="week-grid" id="weekGridContainer"></div>
         </div>
 
@@ -302,14 +301,21 @@
         </div>
     </div>
 
+    <!-- TAB 2: 规范题库 -->
     <div id="tab-questions" class="tab-content">
         <div class="card">
-            <h2>规范题库速查与随机练习 📖</h2>
-            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">来源：重庆大学版《建筑设计规范常用条文速查手册》PDF</p>
-            <button class="btn" onclick="loadRandomQuestion()">🎲 随机抽取一道规范题</button>
-            <div id="questionDisplayArea" style="margin-top: 15px;">
+            <h2>规范题库速查与检索 📖</h2>
+            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">支持关键词检索条文或随机抽取真题演练</p>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <input type="text" id="qSearchInput" placeholder="输入条文编号或关键词（如：安全出口、防火）" style="margin-bottom:0;">
+                <button class="btn" style="width: 100px;" onclick="searchQuestions()">搜索</button>
+            </div>
+            <button class="btn btn-secondary" onclick="loadRandomQuestion()" style="margin-bottom: 12px;">🎲 随机抽取一道规范题</button>
+            
+            <div id="questionDisplayArea">
                 <div class="qb-box">
-                    <p style="font-weight: bold; color: #4A3B5C;" id="qChapter">请点击上方按钮开始随机抽取题目</p>
+                    <p style="font-weight: bold; color: #4A3B5C;" id="qChapter">请点击上方按钮随机抽题或输入关键词搜索</p>
                     <p id="qText">题目内容将在此处展示...</p>
                     <button class="btn btn-secondary" id="btnShowAnswer" style="margin-top: 8px; display:none;" onclick="toggleAnswer()">查看参照</button>
                     <div id="qAnswerBox" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #D1C4E9;">
@@ -318,10 +324,11 @@
                     </div>
                 </div>
             </div>
-            <div class="warning-tip">⚠️ <b>特别提示</b>：正式考试使用前，请与目标院校指定规范及现行规范版本核对。</div>
+            <div class="warning-tip" style="margin-top: 12px;">⚠️ <b>特别提示</b>：正式考试使用前，请与目标院校指定规范及现行规范版本核对。</div>
         </div>
     </div>
 
+    <!-- TAB 3: 英语复盘 -->
     <div id="tab-english" class="tab-content">
         <div class="card">
             <h2>英语每日高价值错误复盘 📝</h2>
@@ -355,6 +362,7 @@
         </div>
     </div>
 
+    <!-- TAB 4: 专业漏洞 -->
     <div id="tab-profession" class="tab-content">
         <div class="card">
             <h2>专业课「还没记牢的细节点」 🏛️</h2>
@@ -370,10 +378,11 @@
         </div>
     </div>
 
+    <!-- TAB 5: 设置 -->
     <div id="tab-settings" class="tab-content">
         <div class="card">
             <h2>数据独立与备份 ⚙️</h2>
-            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">所有数据均安全保存在您的浏览器本地，不上传云端，保护您的个人隐私。</p>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">所有数据安全保存在您的浏览器本地，不上传云端。</p>
             <button class="btn" style="margin-bottom: 10px;" onclick="exportDataJSON()">📥 导出本机学习数据 (JSON)</button>
             <button class="btn btn-secondary" onclick="clearLocalData()">🗑️ 清空所有本地数据</button>
         </div>
@@ -389,6 +398,7 @@
 </nav>
 
 <script>
+    // Data Migration v11 -> v12
     function migrateData() {
         const v11Tasks = localStorage.getItem('zhuxi_v11_tasks') || localStorage.getItem('zhuxi_tasks');
         if (v11Tasks && !localStorage.getItem('zhuxi_v12_migrated')) {
@@ -408,19 +418,33 @@
         localStorage.setItem('zhuxi_v12_' + key, JSON.stringify(val));
     }
 
-    let tasks = getData('tasks', [
-        { id: 1, title: '背诵建筑史：宋代建筑特征', subject: '建筑史', date: new Date().toISOString().split('T')[0], completed: true },
-        { id: 2, title: '刷规范题库 30 题', subject: '规范', date: new Date().toISOString().split('T')[0], completed: false },
-        { id: 3, title: '完成英语真题阅读精读', subject: '英语', date: new Date().toISOString().split('T')[0], completed: false }
-    ]);
+    // Fully dynamic tasks (empty by default if none created)
+    let tasks = getData('tasks', []);
+    let englishRecords = getData('english', []);
+    let profRecords = getData('prof', []);
 
-    let englishRecords = getData('english', [
-        { id: 1, date: '2026-09-09', type: '选项辨析', reason: '看懂文章但比较选项时凭第一感觉，没有回原文核对。', tip: '选项都觉得对时必须回原文找证据。' }
-    ]);
+    // Built-in fallback question bank + dynamic fetch loader
+    let questionBank = [
+        { chapter: "第一章 总则", section: "1.1 基本规定", code_no: "1.0.1", question: "为了在建筑设计中贯彻国家的技术经济政策，做到安全、适用、经济、美观和绿色环保，特制订本规范。", answer: "请对照重庆大学版《建筑设计规范常用条文速查手册》PDF原书核对。", basis: "建筑设计通用规范", page: "1" },
+        { chapter: "第二章 防火与疏散", section: "2.1 安全出口", code_no: "2.1.1", question: "公共建筑内每个防火分区或一个防火分区的每个楼层，其安全出口的数量应经计算确定，且不应少于几个？", answer: "不应少于2个。当符合特定独立核心筒或单层面积较小时可设1个。", basis: "《建筑设计防火规范》GB 50016", page: "15" }
+    ];
 
-    let profRecords = getData('prof', [
-        { id: 1, date: '2026-09-09', content: '拜占庭建筑集中式构图的核心特点及鼓座应用。', mastered: false }
-    ]);
+    // Try loading external code-bank.json if available
+    async function initQuestionBank() {
+        try {
+            const res = await fetch('./code-bank.json');
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    questionBank = data;
+                    console.log('[筑习题库] 成功加载外部题库条文数:', questionBank.length);
+                }
+            }
+        } catch(e) {
+            console.log('[筑习题库] 使用内置备用题库');
+        }
+    }
+    initQuestionBank();
 
     function switchTab(tabId, el) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -456,17 +480,17 @@
         const profUnmastered = profRecords.filter(p => !p.mastered).length;
 
         document.getElementById('weeklySummaryContent').innerHTML = `
-            • <b>本月任务完成率</b>：${rate}%（共完成 ${completedTasks}/${totalTasks} 项任务）。<br>
+            • <b>本周任务完成率</b>：${rate}%（共完成 ${completedTasks}/${totalTasks} 项）。<br>
             • <b>英语复盘</b>：本周累计高价值错误记录 ${engCount} 条。<br>
             • <b>专业漏洞</b>：当前有 ${profUnmastered} 个细节点尚未完全掌握。<br>
-            • <b>下周建议</b>：减少无效重复阅读，增加主动回忆与规范题库真题演练。
+            • <b>下周建议</b>：增加主动回忆与规范题库真题演练。
         `;
     }
 
     function renderTasks() {
         const list = document.getElementById('taskList');
         if (tasks.length === 0) {
-            list.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">暂无任务，点击上方添加新任务吧！</p>';
+            list.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:15px;">暂无任务，请点击上方「+ 添加任务」创建您的专属计划！</p>';
             return;
         }
         let html = '';
@@ -517,21 +541,48 @@
         renderTasks();
     }
 
-    async function loadRandomQuestion() {
-        if (window.codeBankAdapter && !window.codeBankAdapter.loaded) {
-            await window.codeBankAdapter.init();
-        }
-        const q = window.codeBankAdapter ? window.codeBankAdapter.getRandomQuestion() : null;
+    function displayQuestion(q) {
         if (!q) {
-            alert('题库正在加载或未找到 code-bank.json');
+            alert('未找到相关条文');
             return;
         }
-        document.getElementById('qChapter').innerText = `${q.chapter} — ${q.section} (条文: ${q.code_no})`;
-        document.getElementById('qText').innerText = q.question;
-        document.getElementById('qAnswerText').innerText = '参照答案: ' + q.answer;
-        document.getElementById('qBasisText').innerText = `规范依据: ${q.basis} (P${q.page})`;
+        document.getElementById('qChapter').innerText = `${q.chapter || ''} — ${q.section || ''} (条文: ${q.code_no || 'N/A'})`;
+        document.getElementById('qText').innerText = q.question || '';
+        document.getElementById('qAnswerText').innerText = '参照答案: ' + (q.answer || '');
+        document.getElementById('qBasisText').innerText = `规范依据: ${q.basis || ''} (P${q.page || ''})`;
         document.getElementById('btnShowAnswer').style.display = 'block';
         document.getElementById('qAnswerBox').style.display = 'none';
+    }
+
+    function loadRandomQuestion() {
+        if (!questionBank.length) {
+            alert('题库为空');
+            return;
+        }
+        const idx = Math.floor(Math.random() * questionBank.length);
+        displayQuestion(questionBank[idx]);
+    }
+
+    function searchQuestions() {
+        const keyword = document.getElementById('qSearchInput').value.trim();
+        if (!keyword) {
+            loadRandomQuestion();
+            return;
+        }
+        const matches = questionBank.filter(q => 
+            (q.question && q.question.includes(keyword)) ||
+            (q.code_no && q.code_no.includes(keyword)) ||
+            (q.chapter && q.chapter.includes(keyword)) ||
+            (q.basis && q.basis.includes(keyword))
+        );
+        if (matches.length > 0) {
+            displayQuestion(matches[0]);
+            if (matches.length > 1) {
+                alert(`找到 ${matches.length} 条相关规范，当前展示第一条。`);
+            }
+        } else {
+            alert('未找到匹配的规范条文，请尝试更换关键词。');
+        }
     }
 
     function toggleAnswer() {
