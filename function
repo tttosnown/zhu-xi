@@ -1,1 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>筑习 - 建筑规范智能考点与检索系统</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #8E8E93;
+            --accent: #007AFF;
+            --success: #34C759;
+            --danger: #FF3B30;
+            --separator: #E5E5EA;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; }
+        header { background: var(--card-bg); padding: 16px; text-align: center; border-bottom: 0.5px solid var(--separator); font-size: 17px; font-weight: 600; }
+        .container { max-width: 600px; margin: 16px auto; padding: 0 12px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h2 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
+        .btn-secondary { background: #E5E5EA; color: var(--text-main); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-group { display: flex; gap: 8px; margin-top: 12px; }
+        input[type="text"] { width: 100%; padding: 10px; border: 0.5px solid var(--separator); border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 10px; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 0.5px solid var(--separator); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
+        .nav-item { text-align: center; font-size: 11px; color: var(--text-secondary); cursor: pointer; }
+        .nav-item.active { color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stats-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+        .list-item { padding: 10px 0; border-bottom: 0.5px solid var(--separator); font-size: 13px; }
+        .list-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
 
+<header>筑习 · 规范智能系统</header>
+
+<div class="container">
+    <!-- TAB 1: 每日抽问 -->
+    <div id="tab-quiz" class="tab-content active">
+        <div class="card">
+            <h2>🏛️ 每日建筑规范考点抽查</h2>
+            <div class="stats-row">
+                <span id="statCorrect">正确: 0</span>
+                <span id="statWrong">错误: 0</span>
+            </div>
+            <div style="background: #F9F9FB; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 0.5px solid var(--separator);">
+                <p id="qTitle" style="font-weight: 600; font-size: 13px; margin-bottom: 4px;"></p>
+                <p id="qContent" style="font-size: 13px; margin-bottom: 12px;"></p>
+                <div id="qAnswerBox" style="display:none;">
+                    <p style="font-size: 13px; color: var(--success); margin-bottom: 8px;" id="qAnswerText"></p>
+                </div>
+            </div>
+            <div id="actionButtons" class="btn-group">
+                <button class="btn btn-secondary" onclick="toggleAnswer()">查看解析</button>
+            </div>
+            <div id="judgeButtons" class="btn-group" style="display:none; margin-top: 8px;">
+                <button class="btn btn-danger" onclick="recordResult(false)">❌ 没掌握（记入错题）</button>
+                <button class="btn btn-success" onclick="recordResult(true)">✔️ 已掌握</button>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 12px;" onclick="loadRandomQuestion()">下一题</button>
+        </div>
+    </div>
+
+    <!-- TAB 2: 规范查找 -->
+    <div id="tab-search" class="tab-content">
+        <div class="card">
+            <h2>🔍 最新建筑规范智能查找</h2>
+            <input type="text5" type="text" id="searchInput" placeholder="输入关键词（如：防火分区、无障碍、疏散...）" oninput="searchNorms()">
+            <div id="searchResult" style="max-height: 400px; overflow-y: auto;">
+                <p style="font-size: 13px; color: var(--text-secondary);">输入关键词检索中国国家最新规范标准...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: 错题总结 -->
+    <div id="tab-summary" class="tab-content">
+        <div class="card">
+            <h2>📊 每日与每周错题回顾</h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">这里集中了你标记未掌握的高频规范考点：</p>
+            <div id="wrongListContainer">
+                <p style="font-size: 13px; color: var(--text-secondary);">暂无错题记录，保持得很好！</p>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="clearWrongList()">清空错题本</button>
+        </div>
+    </div>
+</div>
+
+<nav>
+    <div class="nav-item active" onclick="switchTab('quiz', this)"><span>🏛️</span><br>抽问</div>
+    <div class="nav-item" onclick="switchTab('search', this)"><span>🔍</span><br>查找</div>
+    <div class="nav-item" onclick="switchTab('summary', this)"><span>📊</span><br>错题总结</div>
+</nav>
+
+<script>
+    // 扩展题库
+    const questionBank = [
+        { id: 1, title: "《建筑设计防火规范》 GB 50016", content: "高层民用建筑内防火分区之间的防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" },
+        { id: 2, title: "《民用建筑设计统一标准》 GB 50352", content: "严寒和寒冷地区公共建筑的体形系数应如何控制以满足节能要求？", answer: "应严格控制体形系数，一般不宜大于 0.30。" },
+        { id: 3, title: "《建筑与市政工程无障碍通用规范》 GB 55019", content: "轮椅坡道的最大坡度不应大于多少？", answer: "不应大于 1:12。" },
+        { id: 4, title: "《建筑防火通用规范》 GB 55037", content: "一二级耐火等级民用建筑防火分区最大允许建筑面积一般是多少？", answer: "不应大于 2500 平方米。" },
+        { id: 5, title: "《建筑设计防火规范》 GB 50016", content: "高层建筑应设环形消防车道，当设环形车道有困难时，可沿长边设什么？", answer: "可沿长边设消防车救援场地或消防车道。" }
+    ];
+
+    // 规范检索数据库
+    const normsDatabase = [
+        { name: "《建筑设计防火规范》 GB 50016-2014(2018年版)", desc: "涵盖厂房、仓库、民用建筑的防火间距、防火分区、安全疏散及消防设施基本指标。" },
+        { name: "《建筑防火通用规范》 GB 55037-2022", desc: "强制性工程建设规范，规定了建筑分类、耐火等级及总体防火安全底线。" },
+        { name: "《消防设施通用规范》 GB 55036-2022", desc: "规定室内外消火栓、自动灭火、火灾自动报警及防排烟系统设置标准。" },
+        { name: "《建筑与市政工程无障碍通用规范》 GB 55019-2021", desc: "规定了无障碍通道、轮椅坡道、出入口、电梯及无障碍厕所的具体构造标准。" },
+        { name: "《民用建筑设计统一标准》 GB 50352-2019", desc: "规定民用建筑设计的基本原则、建筑高度、体形系数、日照间距及室内环境指标。" }
+    ];
+
+    let currentQuestion = null;
+    let stats = JSON.parse(localStorage.getItem('zhuXiStats')) || { correct: 0, wrong: 0 };
+    let wrongBook = JSON.parse(localStorage.getItem('zhuXiWrongBook')) || [];
+
+    function updateStatsUI() {
+        document.getElementById('statCorrect').innerText = `正确: ${stats.correct}`;
+        document.getElementById('statWrong').innerText = `错误: ${stats.wrong}`;
+    }
+
+    function loadRandomQuestion() {
+        const randomIndex = Math.floor(Math.random() * questionBank.length);
+        currentQuestion = questionBank[randomIndex];
+
+        document.getElementById("qTitle").innerText = currentQuestion.title;
+        document.getElementById("qContent").innerText = currentQuestion.content;
+        document.getElementById("qAnswerText").innerText = "解析：" + currentQuestion.answer;
+        
+        document.getElementById("qAnswerBox").style.display = "none";
+        document.getElementById("actionButtons").style.display = "flex";
+        document.getElementById("judgeButtons").style.display = "none";
+    }
+
+    function toggleAnswer() {
+        document.getElementById("qAnswerBox").style.display = "block";
+        document.getElementById("actionButtons").style.display = "none";
+        document.getElementById("judgeButtons").style.display = "flex";
+    }
+
+    function recordResult(isCorrect) {
+        if (isCorrect) {
+            stats.correct++;
+        } else {
+            stats.wrong++;
+            // 避免错题重复添加
+            if (!wrongBook.some(item => item.id === currentQuestion.id)) {
+                wrongBook.push(currentQuestion);
+                localStorage.setItem('zhuXiWrongBook', JSON.stringify(wrongBook));
+            }
+        }
+        localStorage.setItem('zhuXiStats', JSON.stringify(stats));
+        updateStatsUI();
+        renderWrongList();
+        loadRandomQuestion();
+    }
+
+    function searchNorms() {
+        const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+        const resultContainer = document.getElementById("searchResult");
+        
+        if (!keyword) {
+            resultContainer.innerHTML = '<p style="font-size: 13px; color: var(--text-secondary);">输入关键词检索中国国家最新规范标准...</p>';
+            return;
+        }
+
+        const filtered = normsDatabase.filter(item => item.name.toLowerCase().includes(keyword) || item.desc.toLowerCase().includes(keyword));
+        
+        if (filtered.length === 0) {
+            resultContainer.innerHTML = '<p style="font-size: 13px; color: var(--text-secondary);">未找到相关规范，请尝试更换关键词。</p>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(item => {
+            html += `<div class="list-item"><strong style="font-size:13px; color:var(--accent);">${item.name}</strong><p style="margin-top:4px; color:var(--text-main);">${item.desc}</p></div>`;
+        });
+        resultContainer.innerHTML = html;
+    }
+
+    function renderWrongList() {
+        const container = document.getElementById("wrongListContainer");
+        if (wrongBook.length === 0) {
+            container.innerHTML = '<p style="font-size: 13px; color: var(--text-secondary);">暂无错题记录，保持得很好！</p>';
+            return;
+        }
+
+        let html = '';
+        wrongBook.forEach((item, index) => {
+            html += `<div class="list-item">
+                <p style="font-weight:600; font-size:13px;">${index + 1}. ${item.title}</p>
+                <p style="font-size:12px; color:var(--text-secondary); margin:2px 0;">${item.content}</p>
+                <p style="font-size:12px; color:var(--success);">参考答案：${item.answer}</p>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function clearWrongList() {
+        wrongBook = [];
+        localStorage.removeItem('zhuXiWrongBook');
+        renderWrongList();
+    }
+
+    function switchTab(tabId, element) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    // 初始化运行
+    window.onload = function() {
+        loadRandomQuestion();
+        updateStatsUI();
+        renderWrongList();
+    };
+</script>
+
+</body>
+</html>
