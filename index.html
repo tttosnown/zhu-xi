@@ -3,31 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>筑习 - 建筑考研学习系统 v1.1</title>
+    <title>筑习 - 建筑考研学习系统 v1.2</title>
     <link rel="manifest" href="./manifest.webmanifest">
-    <meta name="theme-color" content="#D1C4E9">
+    <meta name="theme-color" content="#F2F2F7">
     <link rel="apple-touch-icon" href="./icon-180.png">
     <style>
         :root {
-            --bg-color: #FAF8F5;
+            --bg-color: #F2F2F7;
             --card-bg: #FFFFFF;
-            --text-main: #4A4543;
-            --text-sub: #8C827D;
-            --lavender: #D1C4E9;
-            --pink: #F8BBD0;
-            --blue: #B3E5FC;
-            --green: #C8E6C9;
-            --yellow: #FFF9C4;
-            --accent-purple: #9575CD;
-            --shadow: 0 4px 16px rgba(149, 117, 205, 0.1);
-            --radius: 16px;
+            --text-main: #1C1C1E;
+            --text-sub: #8E8E93;
+            --separator: #C6C6C8;
+            --accent: #007AFF;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -35,94 +31,110 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding-bottom: 90px;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
-        @media (min-width: 768px) {
-            body { max-width: 900px; padding: 20px 20px 90px 20px; }
-            .container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .card.full-width { grid-column: span 2; }
-        }
-
         header {
-            background: linear-gradient(135deg, var(--lavender), var(--pink));
-            padding: 24px 20px;
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            box-shadow: var(--shadow);
-            color: #4A3B5C;
-            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 16px 20px;
+            border-bottom: 0.5px solid var(--separator);
         }
 
         header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-        }
-
-        header p {
-            font-size: 13px;
-            opacity: 0.85;
+            align-items: center;
         }
 
         .container {
-            padding: 0 16px;
+            padding: 16px;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 16px;
             margin-bottom: 16px;
             box-shadow: var(--shadow);
-            border: 1px solid rgba(209, 196, 233, 0.3);
+            border: 0.5px solid rgba(0,0,0,0.04);
         }
 
         .card h2 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #5E4DB2;
+            color: var(--text-main);
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            letter-spacing: -0.2px;
         }
 
-        /* 星期 Routine 样式 */
+        /* 颜色色块 Routine 样式 */
         .routine-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 6px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         .routine-day {
-            background: #F5F3F9;
-            border-radius: 10px;
-            padding: 8px 2px;
+            background: #FAFAFC;
+            border-radius: 8px;
+            padding: 8px 4px;
             text-align: center;
             font-size: 11px;
-            border: 1px solid #EAE4F2;
+            border: 0.5px solid var(--separator);
+            cursor: pointer;
         }
         .routine-day.today {
-            background: var(--lavender);
-            border-color: var(--accent-purple);
-            font-weight: bold;
-            color: #4A3B5C;
+            border-color: var(--accent);
+            background: #F0F6FF;
         }
-        .routine-day .d-name { color: var(--text-sub); margin-bottom: 2px; }
-        .routine-day.today .d-name { color: #4A3B5C; }
+        .routine-day .d-name {
+            color: var(--text-sub);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .routine-day.today .d-name { color: var(--accent); font-weight: 600; }
+        
+        .color-dots-container {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            flex-wrap: wrap;
+            min-height: 12px;
+            margin-top: 4px;
+        }
+        .task-color-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
 
-        /* 任务与星级 */
+        /* 学科颜色定义 */
+        .dot-建筑史 { background: #AF52DE; }
+        .dot-建筑理论 { background: #5856D6; }
+        .dot-建筑物理 { background: #007AFF; }
+        .dot-构造技术 { background: #34C759; }
+        .dot-英语 { background: #FF9500; }
+        .dot-政治 { background: #FF3B30; }
+        .dot-通用 { background: #8E8E93; }
+
+        /* 任务列表 */
         .task-item {
-            background: #FAFAFA;
-            padding: 12px 14px;
-            border-radius: 12px;
-            border: 1px solid #EFEBE9;
-            margin-bottom: 10px;
+            background: #FAFAFC;
+            padding: 12px;
+            border-radius: 10px;
+            border: 0.5px solid var(--separator);
+            margin-bottom: 8px;
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -138,25 +150,17 @@
             gap: 10px;
             flex: 1;
         }
-        .task-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--text-sub);
-        }
-        .stars { color: #FFA726; font-size: 12px; letter-spacing: 1px; }
         .badge {
             font-size: 10px;
             padding: 2px 6px;
-            border-radius: 6px;
-            background: var(--blue);
-            color: #01579B;
+            border-radius: 4px;
+            background: #E5E5EA;
+            color: var(--text-main);
             font-weight: 500;
         }
         .delete-btn {
-            background: #FFCDD2;
-            color: #C62828;
+            background: #FF3B30;
+            color: white;
             border: none;
             padding: 4px 8px;
             border-radius: 6px;
@@ -164,47 +168,33 @@
             cursor: pointer;
         }
 
-        /* 状态指示点 */
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .dot-blue { background: #2196F3; }   /* 蓝：新学 */
-        .dot-yellow { background: #FFEB3B; } /* 黄：巩固 */
-        .dot-green { background: #4CAF50; }  /* 绿：熟练 */
-        .dot-red { background: #F44336; }    /* 红：遗忘多 */
-
         input, select, textarea {
             width: 100%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid #D7CCC8;
-            background: #FFF;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 0.5px solid var(--separator);
+            background: #F9F9FB;
             font-size: 14px;
             margin-bottom: 10px;
             outline: none;
         }
-        input:focus, textarea:focus { border-color: var(--accent-purple); }
+        input:focus, textarea:focus { border-color: var(--accent); background: #FFF; }
 
         .btn {
-            background: var(--accent-purple);
+            background: var(--accent);
             color: white;
             border: none;
             padding: 10px 16px;
             border-radius: 10px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             width: 100%;
-            box-shadow: 0 2px 6px rgba(149,117,205,0.3);
         }
-        .btn:active { transform: scale(0.98); }
+        .btn:active { opacity: 0.8; }
         .btn-secondary {
-            background: #E0E0E0;
-            color: #424242;
-            box-shadow: none;
+            background: #E5E5EA;
+            color: var(--text-main);
         }
         .btn-small {
             padding: 4px 10px;
@@ -212,12 +202,32 @@
             width: auto;
         }
 
-        /* 模态框/弹窗 */
+        /* 月历视图样式 */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .month-cell {
+            background: #FAFAFC;
+            border-radius: 6px;
+            padding: 6px 2px;
+            text-align: center;
+            font-size: 11px;
+            border: 0.5px solid var(--separator);
+            min-height: 45px;
+            cursor: pointer;
+        }
+        .month-cell.has-task { background: #FFFFFF; }
+
+        /* 模态框 */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
             z-index: 2000;
             align-items: center;
             justify-content: center;
@@ -226,51 +236,35 @@
         .modal.active { display: flex; }
         .modal-content {
             background: #FFF;
-            border-radius: var(--radius);
+            border-radius: 16px;
             width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
+            max-width: 450px;
+            max-height: 85vh;
             overflow-y: auto;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        /* 主动回忆问答卡 */
-        .recall-question-box {
-            background: #F3E5F5;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--accent-purple);
-        }
-        .recall-question-box p {
-            font-size: 13px;
-            font-weight: 600;
-            color: #4A3B5C;
-            margin-bottom: 8px;
+            padding: 20px;
         }
 
         nav.tab-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid #E0D7E8;
+            padding: 8px 0 20px 0;
+            border-top: 0.5px solid var(--separator);
             z-index: 1000;
-            max-width: 850px;
+            max-width: 600px;
             margin: 0 auto;
         }
         .tab-item {
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-sub);
             cursor: pointer;
             flex: 1;
         }
-        .tab-item.active { color: var(--accent-purple); font-weight: bold; }
+        .tab-item.active { color: var(--accent); font-weight: 600; }
         .tab-item span { display: block; font-size: 18px; margin-bottom: 2px; }
 
         .tab-content { display: none; }
@@ -280,152 +274,121 @@
 <body>
 
 <header>
-    <h1>筑习 <span>v1.1</span> <button class="btn btn-small btn-secondary" onclick="exportDataJSON()" style="font-size:12px;">📤 导出</button></h1>
-    <p>建筑考研系统 · 整周Routine · 主动回忆 · 智能复习推演</p>
+    <h1>
+        <span>筑习 <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">v1.2</span></span>
+        <button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button>
+    </h1>
 </header>
 
 <div class="container">
-    <!-- TAB 1: 首页 / Routine / 任务 -->
+    <!-- TAB 1: 首页 Routine 与 累计月历 -->
     <div id="tab-dashboard" class="tab-content active">
-        <!-- 整周 Routine 视图 -->
-        <div class="card full-width">
-            <h2>📅 本周学习 Routine <span>今日高亮</span></h2>
+        <div class="card">
+            <h2>📅 本周 Routine 色块看板 
+                <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">点击日期查看详情</span>
+            </h2>
             <div class="routine-grid" id="routineGridContainer"></div>
         </div>
 
-        <!-- 数据看板百分比 -->
-        <div class="card full-width" style="background: linear-gradient(135deg, #FFF9C4, #E8F5E9);">
-            <h2>📊 本周核心效率看板</h2>
-            <div id="statsSummary" style="font-size: 13px; line-height: 1.6; color: #333;">
-                正在计算...
+        <div class="card">
+            <h2>📈 累计学习与月历全景 
+                <span style="font-size:12px; color:var(--text-sub);" id="currentMonthTitle"></span>
+            </h2>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-sub); margin-bottom:4px;">
+                <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
             </div>
+            <div class="month-grid" id="monthGridContainer"></div>
         </div>
 
-        <!-- 每日任务列表 -->
-        <div class="card full-width">
-            <h2>今日任务与复习 (含主动回忆)
-                <div style="display:flex; gap:6px;">
-                    <button class="btn btn-small" onclick="openAddTaskModal()">+ 临时/常规任务</button>
-                </div>
+        <div class="card">
+            <h2>今日任务清单 
+                <button class="btn btn-small" onclick="openAddTaskModal()">+ 添加任务</button>
             </h2>
             <div id="taskListContainer"></div>
         </div>
     </div>
 
-    <!-- TAB 2: 学科知识树与章节 -->
+    <!-- TAB 2: 学科知识树 -->
     <div id="tab-tree" class="tab-content">
-        <div class="card full-width">
-            <h2>🌳 专业课与学科知识树
-                <button class="btn btn-small" onclick="addCustomChapterNode()">+ 添加自定义章节</button>
+        <div class="card">
+            <h2>🌳 学科与章节知识树
+                <button class="btn btn-small" onclick="addCustomChapterNode()">+ 添加</button>
             </h2>
-            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">
-                科目：建筑史 / 建筑理论 / 建筑物理 / 构造技术 / 英语 / 政治
-            </p>
             <div id="subjectTreeContainer"></div>
         </div>
     </div>
 
-    <!-- TAB 3: 每日规范与智能复习 -->
+    <!-- TAB 3: 规范与复习 -->
     <div id="tab-review" class="tab-content">
-        <div class="card full-width">
-            <h2>🏛️ 每日建筑规范题抽查</h2>
-            <div id="codeQuestionBox" style="background: #E3F2FD; padding: 14px; border-radius: 12px; margin-bottom: 12px;">
-                <p id="codeQTitle" style="font-weight: bold; color: #0D47A1; margin-bottom: 6px;">加载中...</p>
-                <p id="codeQContent" style="font-size: 13px; margin-bottom: 10px;"></p>
-                <button class="btn btn-small btn-secondary" onclick="toggleCodeAnswer()">查看规范解析</button>
-                <div id="codeQAnswer" style="display:none; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #90CAF9; font-size: 13px; color: #2E7D32;"></div>
+        <div class="card">
+            <h2>🏛️ 每日建筑规范抽查</h2>
+            <div style="background: #F9F9FB; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 0.5px solid var(--separator);">
+                <p id="codeQTitle" style="font-weight: 600; font-size:13px; margin-bottom: 4px;"></p>
+                <p id="codeQContent" style="font-size: 13px; margin-bottom: 8px;"></p>
+                <button class="btn btn-small btn-secondary" onclick="toggleCodeAnswer()">查看解析</button>
+                <div id="codeQAnswer" style="display:none; margin-top: 8px; padding-top: 8px; border-top: 0.5px dashed var(--separator); font-size: 13px; color: #34C759;"></div>
             </div>
-            <button class="btn btn-secondary" onclick="loadDailyCodeQuestion()">换一题演练</button>
-        </div>
-
-        <div class="card full-width">
-            <h2>🔄 智能复习队列与日期推演</h2>
-            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 12px;">根据艾宾浩斯遗忘曲线及您的掌握度自动推荐复习日期，支持随时修改或跳过。</p>
-            <div id="smartReviewQueue"></div>
+            <button class="btn btn-secondary" onclick="loadDailyCodeQuestion()">换一题</button>
         </div>
     </div>
 
-    <!-- TAB 4: 设置与提醒 -->
+    <!-- TAB 4: 设置 -->
     <div id="tab-settings" class="tab-content">
-        <div class="card full-width">
-            <h2>⚙️ 系统设置与 20:00 提醒</h2>
-            <p style="font-size: 13px; margin-bottom: 10px;">⏰ 每日 20:00 任务提醒：已开启（模拟提示框/通知）</p>
-            <button class="btn btn-secondary" onclick="simulate2000Reminder()" style="margin-bottom: 10px;">🔔 测试触发 20:00 提醒弹窗</button>
-            <button class="btn btn-secondary" onclick="clearAllData()" style="color: #D32F2F;">🗑️ 清空并重置所有数据</button>
+        <div class="card">
+            <h2>⚙️ 系统设置</h2>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 10px;">所有打卡与历史数据均在本地安全累计存储。</p>
+            <button class="btn btn-secondary" onclick="simulate2000Reminder()" style="margin-bottom: 10px;">🔔 测试 20:00 晚间提醒</button>
+            <button class="btn btn-secondary" onclick="clearAllData()" style="color: #FF3B30;">🗑️ 清空所有数据</button>
         </div>
     </div>
 </div>
 
-<!-- 主动回忆五道题测评弹窗 -->
-<div id="recallModal" class="modal">
+<!-- 详细任务/主动回忆弹窗 -->
+<div id="taskModal" class="modal">
     <div class="modal-content">
-        <h2 id="modalTaskTitle" style="margin-bottom: 10px;">任务主动回忆训练</h2>
-        <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 16px;">请针对以下 5 个核心考点在脑中或输入回答，完成后进行自评。</p>
-        <div id="recallQuestionsList"></div>
-        
-        <div style="background: #F5F3F9; padding: 12px; border-radius: 10px; margin-top: 15px; margin-bottom: 15px;">
-            <p style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">整体知识掌握度自评：</p>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary" onclick="submitRecallEvaluation(85, 'green')">🟢 很熟悉大部分</button>
-                <button class="btn btn-secondary" onclick="submitRecallEvaluation(60, 'yellow')">🟡 一点点印象</button>
-                <button class="btn btn-secondary" onclick="submitRecallEvaluation(20, 'red')">🔴 完全忘记</button>
-            </div>
-            <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px;">精确修改掌握率(%):</span>
-                <input type="number" id="customMasteryInput" value="80" min="0" max="100" style="margin-bottom:0; width: 100px;">
-                <button class="btn btn-small" onclick="submitCustomMastery()">确定保存</button>
-            </div>
-        </div>
-        <button class="btn btn-secondary" onclick="closeRecallModal()">关闭并返回</button>
+        <h2 id="modalTitle" style="margin-bottom: 10px;">任务详情与主动回忆</h2>
+        <div id="modalBody"></div>
+        <button class="btn btn-secondary" onclick="closeTaskModal()" style="margin-top: 15px;">关闭</button>
     </div>
 </div>
 
 <nav class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('dashboard', this)"><span>📅</span>Routine</div>
-    <div class="tab-item" onclick="switchTab('tree', this)"><span>🌳</span>学科知识树</div>
-    <div class="tab-item" onclick="switchTab('review', this)"><span>🏛️</span>规范与复习</div>
+    <div class="tab-item active" onclick="switchTab('dashboard', this)"><span>📅</span>看板</div>
+    <div class="tab-item" onclick="switchTab('tree', this)"><span>🌳</span>知识树</div>
+    <div class="tab-item" onclick="switchTab('review', this)"><span>🏛️</span>规范</div>
     <div class="tab-item" onclick="switchTab('settings', this)"><span>⚙️</span>设置</div>
 </nav>
 
 <script>
-    // 数据持久化封装
     function getData(key, defaultVal) {
-        const val = localStorage.getItem('zhuxi_v1_1_' + key);
+        const val = localStorage.getItem('zhuxi_v1_2_' + key);
         return val ? JSON.parse(val) : defaultVal;
     }
     function saveData(key, val) {
-        localStorage.setItem('zhuxi_v1_1_' + key, JSON.stringify(val));
+        localStorage.setItem('zhuxi_v1_2_' + key, JSON.stringify(val));
     }
 
-    // 学科分类
     const subjects = ["建筑史", "建筑理论", "建筑物理", "构造技术", "英语", "政治"];
+    const todayStr = new Date().toISOString().split('T')[0];
 
-    // 默认初始任务 (含 1-5 星难度、状态、复习日期)
     const defaultTasks = [
-        { id: 101, title: "拜占庭建筑核心特征与圣索菲亚大教堂", subject: "建筑史", stars: 5, completed: false, mastery: 40, status: "blue", nextReview: "2026-06-10", isRecurring: true },
-        { id: 102, title: "英语真题阅读长难句精析与熟词僻义", subject: "英语", stars: 4, completed: false, mastery: 60, status: "yellow", nextReview: "2026-06-09", isRecurring: true },
-        { id: 103, title: "公共建筑安全出口与疏散距离规范条文", subject: "建筑物理", stars: 5, completed: true, mastery: 90, status: "green", nextReview: "2026-06-15", isRecurring: true },
-        { id: 104, title: "墙体保温构造与节点防水细部构造", subject: "构造技术", stars: 3, completed: false, mastery: 30, status: "red", nextReview: "2026-06-08", isRecurring: true },
-        { id: 105, title: "政治马哲核心原理辨析题专项演练", subject: "政治", stars: 3, completed: false, mastery: 50, status: "yellow", nextReview: "2026-06-11", isRecurring: true }
+        { id: 1, title: "拜占庭建筑核心特征与圣索菲亚大教堂", subject: "建筑史", date: todayStr, completed: false, mastery: 40 },
+        { id: 2, title: "英语真题阅读长难句精析", subject: "英语", date: todayStr, completed: false, mastery: 60 },
+        { id: 3, title: "公共建筑安全出口与疏散距离", subject: "建筑物理", date: todayStr, completed: true, mastery: 90 },
+        { id: 4, title: "政治马哲核心原理辨析", subject: "政治", date: todayStr, completed: false, mastery: 50 }
     ];
 
-    // 默认学科知识树
     const defaultTree = [
-        { id: 1, subject: "建筑史", chapter: "第一章 中国古代建筑史", nodes: ["木构架演变与斗拱", "唐宋清官式做法差异", "江南私家园林布局手法"] },
-        { id: 2, subject: "建筑史", chapter: "第二章 外国建筑史", nodes: ["古希腊罗马古典柱式", "文艺复兴与巴洛克建筑", "现代主义建筑运动五原则"] },
-        { id: 3, subject: "建筑理论", chapter: "第三章 建筑空间组合与理论", nodes: ["柯布西耶多米诺体系", "路易·康空间服务与被服务", "地域性建筑设计策略"] },
-        { id: 4, subject: "构造技术", chapter: "第四章 建筑构造与节点", nodes: ["基础防水与墙身防潮层", "屋面找坡与刚柔防水构造", "变形缝设置原则与做法"] }
+        { id: 1, subject: "建筑史", chapter: "第一章 中国古代建筑史", nodes: ["木构架演变", "唐宋清官式做法"] },
+        { id: 2, subject: "建筑理论", chapter: "第二章 空间组合理论", nodes: ["柯布西耶五原则", "路易·康空间"] }
     ];
 
-    // 规范题库
     const codeBank = [
-        { title: "《建筑设计防火规范》GB 50016", content: "高层民用建筑内防火分区之间的防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" },
-        { title: "《民用建筑设计统一标准》GB 50352", content: "严寒和寒冷地区公共建筑的体形系数应如何控制以满足节能要求？", answer: "应严格控制体形系数，一般不宜大于 0.30。" }
+        { title: "《建筑设计防火规范》", content: "高层民用建筑防火墙耐火极限不应低于多少小时？", answer: "不应低于 3.00h。" }
     ];
 
     let tasks = getData('tasks', defaultTasks);
     let subjectTree = getData('tree', defaultTree);
-    let currentActiveTaskId = null;
 
     function switchTab(tabId, el) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -434,76 +397,135 @@
         el.classList.add('active');
         if (tabId === 'dashboard') renderDashboard();
         if (tabId === 'tree') renderSubjectTree();
-        if (tabId === 'review') renderReviewQueue();
+        if (tabId === 'review') loadDailyCodeQuestion();
     }
 
-    // 渲染首页 Routine 与 统计
     function renderDashboard() {
         renderRoutineGrid();
-        renderStats();
+        renderMonthGrid();
         renderTasksList();
     }
 
+    // 渲染本周 Routine 色块网格
     function renderRoutineGrid() {
         const container = document.getElementById('routineGridContainer');
-        const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-        const todayIdx = (new Date().getDay() + 6) % 7; // 0=周一
+        const curr = new Date();
+        const dayOfWeek = curr.getDay() || 7; 
+        const monday = new Date(curr);
+        monday.setDate(curr.getDate() - dayOfWeek + 1);
+
+        const daysName = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
         let html = '';
-        days.forEach((d, idx) => {
-            const isToday = idx === todayIdx;
-            html += `<div class="routine-day ${isToday ? 'today' : ''}">
-                <div class="d-name">${d}</div>
-                <div>${isToday ? '⭐ 今日' : '日常'}</div>
+        
+        for (let i = 0; i < 7; i++) {
+            let d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            let dStr = d.toISOString().split('T')[0];
+            let isToday = dStr === todayStr;
+
+            let dayTasks = tasks.filter(t => t.date === dStr);
+            let dotsHtml = '';
+            dayTasks.forEach(dt => {
+                dotsHtml += `<div class="task-color-dot dot-${dt.subject}" title="${dt.subject}: ${dt.title}"></div>`;
+            });
+
+            html += `
+            <div class="routine-day ${isToday ? 'today' : ''}" onclick="openDayDetail('${dStr}')">
+                <div class="d-name">${daysName[i]}</div>
+                <div style="font-size:10px; color:var(--text-sub);">${d.getDate()}</div>
+                <div class="color-dots-container">${dotsHtml}</div>
             </div>`;
-        });
+        }
         container.innerHTML = html;
     }
 
-    function renderStats() {
-        const total = tasks.length;
-        const done = tasks.filter(t => t.completed).length;
-        const compRate = total > 0 ? Math.round((done / total) * 100) : 0;
-        
-        let avgMastery = 0;
-        if (total > 0) {
-            const sum = tasks.reduce((acc, t) => acc + (t.mastery || 50), 0);
-            avgMastery = Math.round(sum / total);
-        }
+    // 渲染累计月历视图
+    function renderMonthGrid() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        document.getElementById('currentMonthTitle').innerText = `${year}年${month + 1}月`;
 
-        document.getElementById('statsSummary').innerHTML = `
-            • <b>任务完成率</b>：${compRate}% （已完成 ${done}/${total} 项）<br>
-            • <b>知识平均掌握率</b>：${avgMastery}%<br>
-            • <b>系统复习效率评估</b>：状态平稳，核心漏洞稳步攻克中。
-        `;
+        const firstDay = new Date(year, month, 1).getDay();
+        const offset = firstDay === 0 ? 6 : firstDay - 1; 
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let html = '';
+        for (let i = 0; i < offset; i++) {
+            html += `<div class="month-cell" style="opacity:0.3;"></div>`;
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            let mStr = (month + 1).toString().padStart(2, '0');
+            let dStrNum = day.toString().padStart(2, '0');
+            let dStr = `${year}-${mStr}-${dStrNum}`;
+            let dayTasks = tasks.filter(t => t.date === dStr);
+            
+            let dotsHtml = '';
+            dayTasks.forEach(dt => {
+                dotsHtml += `<div class="task-color-dot dot-${dt.subject}" style="width:5px;height:5px;display:inline-block;margin:1px;"></div>`;
+            });
+
+            html += `
+            <div class="month-cell ${dayTasks.length > 0 ? 'has-task' : ''}" onclick="openDayDetail('${dStr}')">
+                <div style="font-weight:600;">${day}</div>
+                <div>${dotsHtml}</div>
+            </div>`;
+        }
+        document.getElementById('monthGridContainer').innerHTML = html;
     }
 
+    // 点击某一天查看或管理任务
+    function openDayDetail(dateStr) {
+        const dayTasks = tasks.filter(t => t.date === dateStr);
+        document.getElementById('modalTitle').innerText = `📅 日期详情: ${dateStr}`;
+        let html = `<p style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">该日共有 ${dayTasks.length} 项任务记录：</p>`;
+        
+        if (dayTasks.length === 0) {
+            html += `<p style="font-size:13px; color:var(--text-sub);">当天无打卡记录。</p>`;
+        } else {
+            dayTasks.forEach(t => {
+                html += `
+                <div style="background:#F9F9FB; padding:8px; border-radius:6px; margin-bottom:6px; border:0.5px solid var(--separator);">
+                    <span class="badge">${t.subject}</span> <span style="font-size:13px; font-weight:500;">${t.title}</span>
+                    <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">状态: ${t.completed ? '已完成' : '未完成'} | 掌握率: ${t.mastery || 50}%</div>
+                </div>`;
+            });
+        }
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('taskModal').classList.add('active');
+    }
+
+    function closeTaskModal() {
+        document.getElementById('taskModal').classList.remove('active');
+    }
+
+    // 渲染今日任务
     function renderTasksList() {
         const container = document.getElementById('taskListContainer');
-        if (tasks.length === 0) {
-            container.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:15px;">暂无任务，请点击上方添加。</p>';
+        const todayTasks = tasks.filter(t => t.date === todayStr);
+        if (todayTasks.length === 0) {
+            container.innerHTML = '<p style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">今日暂无任务，请添加。</p>';
             return;
         }
         let html = '';
-        tasks.forEach(t => {
-            const starStr = '★'.repeat(t.stars || 3) + '☆'.repeat(5 - (t.stars || 3));
-            const dotClass = `dot-${t.status || 'blue'}`;
+        todayTasks.forEach(t => {
+            const isRecalledSubject = ["建筑史", "建筑理论", "建筑物理", "构造技术"].includes(t.subject);
             html += `
-            <div class="task-item" style="${t.completed ? 'opacity: 0.7;' : ''}">
+            <div class="task-item">
                 <div class="task-row">
                     <div class="task-info">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskCompletion(${t.id})" style="width:18px;height:18px;margin:0;">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" style="width:16px;height:16px;margin:0;">
                         <div>
-                            <span style="font-size:14px; font-weight:600; ${t.completed ? 'text-decoration:line-through;color:var(--text-sub);' : ''}">${t.title}</span>
-                            <div class="task-meta" style="margin-top:2px;">
+                            <span style="font-size:13px; font-weight:500; ${t.completed ? 'text-decoration:line-through;color:var(--text-sub);' : ''}">${t.title}</span>
+                            <div style="margin-top:2px; display:flex; gap:6px; align-items:center;">
                                 <span class="badge">${t.subject}</span>
-                                <span class="stars">${starStr}</span>
-                                <span><span class="status-dot ${dotClass}"></span> 掌握率: ${t.mastery || 50}%</span>
+                                <span style="font-size:11px; color:var(--text-sub);">掌握率: ${t.mastery || 50}%</span>
                             </div>
                         </div>
                     </div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn btn-small" onclick="openRecallModal(${t.id})">🧠 主动回忆测评</button>
-                        <button class="delete-btn" onclick="deleteTask(${t.id})">删除</button>
+                    <div style="display:flex; gap:4px;">
+                        ${isRecalledSubject ? `<button class="btn btn-small" onclick="openRecallModal(${t.id})">回忆</button>` : ''}
+                        <button class="delete-btn" onclick="deleteTask(${t.id})">删</button>
                     </div>
                 </div>
             </div>`;
@@ -511,21 +533,14 @@
         container.innerHTML = html;
     }
 
-    function toggleTaskCompletion(id) {
-        tasks = tasks.map(t => {
-            if (t.id === id) {
-                const nextComp = !t.completed;
-                // 如果是重复任务完成，自动向后生成或重置
-                return {...t, completed: nextComp};
-            }
-            return t;
-        });
+    function toggleTask(id) {
+        tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
         saveData('tasks', tasks);
         renderDashboard();
     }
 
     function deleteTask(id) {
-        if (confirm('确认删除该任务吗？')) {
+        if (confirm('确认删除？')) {
             tasks = tasks.filter(t => t.id !== id);
             saveData('tasks', tasks);
             renderDashboard();
@@ -533,196 +548,113 @@
     }
 
     function openAddTaskModal() {
-        const title = prompt('请输入新任务名称 (临时或常规)：', '建筑史重点背诵');
+        const title = prompt('任务名称：', '古希腊柱式复习');
         if (!title) return;
-        const subject = prompt('请选择学科 (建筑史 / 建筑理论 / 建筑物理 / 构造技术 / 英语 / 政治)：', '建筑史');
-        const stars = parseInt(prompt('请设定任务难度星级 (1~5星)：', '4')) || 3;
+        const sub = prompt('科目 (建筑史/建筑理论/建筑物理/构造技术/英语/政治)：', '建筑史');
         
         tasks.push({
             id: Date.now(),
             title: title,
-            subject: subjects.includes(subject) ? subject : "建筑史",
-            stars: Math.min(Math.max(stars, 1), 5),
+            subject: subjects.includes(sub) ? sub : '通用',
+            date: todayStr,
             completed: false,
-            mastery: 40,
-            status: "blue",
-            nextReview: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-            isRecurring: true
+            mastery: 50
         });
         saveData('tasks', tasks);
         renderDashboard();
     }
 
-    // 主动回忆问答功能
+    // 针对专业课的主动回忆弹窗（政治英语不包含）
     function openRecallModal(id) {
-        currentActiveTaskId = id;
-        const task = tasks.find(t => t.id === id);
-        if (!task) return;
-        document.getElementById('modalTaskTitle').innerText = `🧠 任务主动回忆: ${task.title}`;
+        const t = tasks.find(x => x.id === id);
+        if (!t) return;
+        document.getElementById('modalTitle').innerText = `🧠 主动回忆: ${t.title}`;
         
-        // 自动生成 5 个针对性回忆问题
-        const questions = [
-            `1. 关于“${task.title}”，其核心定义或历史背景是什么？`,
-            `2. 针对该知识点，常考的建筑师、流派或技术指标有哪些？`,
-            `3. 如果在考题中遇到该盲点，最容易犯的错误或陷阱是什么？`,
-            `4. 请写出与之关联的上下游知识点或核心规范条文。`,
-            `5. 针对此任务，你目前的理解薄弱环节在哪个具体细节？`
-        ];
-
-        let html = '';
-        questions.forEach((q, i) => {
-            html += `
-            <div class="recall-question-box">
-                <p>${q}</p>
-                <textarea rows="2" placeholder="在此输入您的回忆答案（或脑中默想后直接进行下方自评）..." id="recall_ans_${i}"></textarea>
-            </div>`;
-        });
-        document.getElementById('recallQuestionsList').innerHTML = html;
-        document.getElementById('customMasteryInput').value = task.mastery || 70;
-        document.getElementById('recallModal').classList.add('active');
-    }
-
-    function closeRecallModal() {
-        document.getElementById('recallModal').classList.remove('active');
-        currentActiveTaskId = null;
-    }
-
-    function submitRecallEvaluation(score, statusColor) {
-        if (!currentActiveTaskId) return;
-        tasks = tasks.map(t => {
-            if (t.id === currentActiveTaskId) {
-                // 计算新的复习日期 (艾宾浩斯顺延)
-                const daysToAdd = score > 80 ? 7 : (score > 50 ? 3 : 1);
-                const nextDate = new Date(Date.now() + 86400000 * daysToAdd).toISOString().split('T')[0];
-                return {...t, mastery: score, status: statusColor, nextReview: nextDate, completed: true};
-            }
-            return t;
-        });
-        saveData('tasks', tasks);
-        closeRecallModal();
-        renderDashboard();
-        alert('已成功更新掌握率与智能复习推荐日期！');
-    }
-
-    function submitCustomMastery() {
-        const val = parseInt(document.getElementById('customMasteryInput').value);
-        if (isNaN(val) || val < 0 || val > 100) {
-            alert('请输入 0~100 之间的有效数字');
-            return;
+        let html = `<p style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">请针对以下 5 个专业考点进行主动回忆：</p>`;
+        for (let i = 1; i <= 5; i++) {
+            html += `<textarea rows="2" placeholder="考点 ${i} 回忆内容..." style="margin-bottom:6px;"></textarea>`;
         }
-        let color = 'blue';
-        if (val >= 80) color = 'green';
-        else if (val >= 50) color = 'yellow';
-        else color = 'red';
-        submitRecallEvaluation(val, color);
+        html += `
+        <div style="margin-top:10px;">
+            <p style="font-size:12px; margin-bottom:6px;">自评掌握度：</p>
+            <div style="display:flex; gap:6px;">
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 90)">🟢 熟练</button>
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 60)">🟡 一般</button>
+                <button class="btn btn-small btn-secondary" onclick="updateMastery(${t.id}, 30)">🔴 遗忘</button>
+            </div>
+        </div>`;
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('taskModal').classList.add('active');
     }
 
-    // 学科知识树渲染
+    function updateMastery(id, score) {
+        tasks = tasks.map(t => t.id === id ? {...t, mastery: score, completed: true} : t);
+        saveData('tasks', tasks);
+        closeTaskModal();
+        renderDashboard();
+        alert('掌握率已更新！');
+    }
+
+    // 学科知识树
     function renderSubjectTree() {
         const container = document.getElementById('subjectTreeContainer');
         let html = '';
         subjects.forEach(sub => {
-            const chapters = subjectTree.filter(item => item.subject === sub);
-            html += `<div style="margin-bottom: 16px; background: #FAFAFA; padding: 12px; border-radius: 12px; border: 1px solid #EFEBE9;">
-                <h3 style="font-size: 15px; color: #5E4DB2; margin-bottom: 8px;">📚 ${sub}</h3>`;
-            if (chapters.length === 0) {
-                html += `<p style="font-size:12px; color:var(--text-sub);">暂无章节，可点击上方添加。</p>`;
-            } else {
-                chapters.forEach(ch => {
-                    html += `<div style="margin-left: 10px; margin-bottom: 8px;">
-                        <p style="font-size: 13px; font-weight: 600; color: #4A4543;">▪ ${ch.chapter}</p>
-                        <ul style="margin-left: 20px; font-size: 12px; color: var(--text-sub);">`;
-                    ch.nodes.forEach(n => {
-                        html += `<li>${n}</li>`;
-                    });
-                    html += `</ul></div>`;
-                });
-            }
+            const chs = subjectTree.filter(item => item.subject === sub);
+            html += `<div style="margin-bottom:12px;"><span class="badge" style="font-size:12px;">${sub}</span>`;
+            if (chs.length === 0) html += `<p style="font-size:12px; color:var(--text-sub); margin-top:4px;">暂无章节</p>`;
+            chs.forEach(c => {
+                html += `<div style="margin-left:10px; margin-top:4px; font-size:13px; font-weight:500;">▪ ${c.chapter}</div>`;
+            });
             html += `</div>`;
         });
         container.innerHTML = html;
     }
 
     function addCustomChapterNode() {
-        const sub = prompt('选择科目 (建筑史 / 建筑理论 / 建筑物理 / 构造技术 / 英语 / 政治)：', '建筑史');
-        if (!subjects.includes(sub)) return alert('学科名称不正确');
-        const chap = prompt('请输入章节名称（如：第三章 现代建筑）：', '第三章 新章节');
+        const sub = prompt('选择科目 (建筑史/建筑理论/建筑物理/构造技术/英语/政治)：', '建筑史');
+        if (!subjects.includes(sub)) return alert('学科错误');
+        const chap = prompt('章节名称：', '第三章 现代建筑');
         if (!chap) return;
-        const nodeName = prompt('请输入该章节下的核心知识点（用逗号隔开多个）：', '考点A, 考点B');
-        const nodes = nodeName ? nodeName.split(',').map(s => s.trim()) : ['核心知识点'];
-
-        subjectTree.push({ id: Date.now(), subject: sub, chapter: chap, nodes: nodes });
+        subjectTree.push({ id: Date.now(), subject: sub, chapter: chap, nodes: [] });
         saveData('tree', subjectTree);
         renderSubjectTree();
     }
 
-    // 每日规范与智能复习队列
     function loadDailyCodeQuestion() {
-        const q = codeBank[Math.floor(Math.random() * codeBank.length)];
+        const q = codeBank[0];
         document.getElementById('codeQTitle').innerText = q.title;
         document.getElementById('codeQContent').innerText = q.content;
-        document.getElementById('codeQAnswer').innerText = '💡 规范正解: ' + q.answer;
+        document.getElementById('codeQAnswer').innerText = '解析: ' + q.answer;
         document.getElementById('codeQAnswer').style.display = 'none';
     }
 
     function toggleCodeAnswer() {
-        const box = document.getElementById('codeQAnswer');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        const b = document.getElementById('codeQAnswer');
+        b.style.display = b.style.display === 'none' ? 'block' : 'none';
     }
 
-    function renderReviewQueue() {
-        loadDailyCodeQuestion();
-        const container = document.getElementById('smartReviewQueue');
-        let html = '';
-        // 按下次复习日期排序
-        const sortedTasks = [...tasks].sort((a, b) => (a.nextReview || '').localeCompare(b.nextReview || ''));
-        sortedTasks.forEach(t => {
-            const dotClass = `dot-${t.status || 'blue'}`;
-            html += `
-            <div style="background: #FAFAFA; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #EFEBE9;">
-                <div>
-                    <span style="font-size: 13px; font-weight: 600;"><span class="status-dot ${dotClass}"></span> ${t.title}</span>
-                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">建议复习日期：${t.nextReview || '近期'} | 掌握率：${t.mastery || 50}%</div>
-                </div>
-                <button class="btn btn-small btn-secondary" onclick="rescheduleReview(${t.id})">调整日期</button>
-            </div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    function rescheduleReview(id) {
-        const newDate = prompt('请输入新的复习日期 (格式 YYYY-MM-DD)：', new Date().toISOString().split('T')[0]);
-        if (!newDate) return;
-        tasks = tasks.map(t => t.id === id ? {...t, nextReview: newDate} : t);
-        saveData('tasks', tasks);
-        renderReviewQueue();
-    }
-
-    // 20:00 提醒与设置
     function simulate2000Reminder() {
-        const done = tasks.filter(t => t.completed).length;
-        const total = tasks.length;
-        alert(`⏰ 【筑习 20:00 每日定时提醒】\n\n今日学习进度播报：\n- 您今天已完成 ${done} / ${total} 项任务。\n- 保持节奏，早日上岸！`);
+        alert('⏰ 【20:00 晚间提醒】今日任务进展顺利，请查收累积打卡！');
     }
 
     function exportDataJSON() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks, subjectTree }, null, 2));
         const a = document.createElement('a');
         a.href = dataStr;
-        a.download = "zhuxi_v1_1_backup.json";
+        a.download = "zhuxi_v1_2_backup.json";
         document.body.appendChild(a);
         a.click();
         a.remove();
     }
 
     function clearAllData() {
-        if (confirm('确认清空所有本地数据并重置吗？')) {
+        if (confirm('确定清空所有累计数据吗？')) {
             localStorage.clear();
             location.reload();
         }
     }
 
-    // 初始化渲染
     renderDashboard();
 </script>
 </body>
