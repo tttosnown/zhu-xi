@@ -62,7 +62,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.7.0</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" style="display:none" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.7.1</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" style="display:none" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
 
 <div class="container">
 <section id="tab-dashboard" class="tab-content active">
@@ -114,7 +114,7 @@ let tasks=getData('tasks',[]);
 let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",children:[{id:2,name:"建筑史",children:[]},{id:3,name:"建筑理论与设计",children:[]},{id:4,name:"建筑物理与构造",children:[]}]});
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
-let codeItems=[],currentCode=null,editingEnglishId=null,editingVulnId=null;
+let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings')renderWeeklySummary()}
@@ -183,32 +183,31 @@ function deleteNode(id){function rm(n){let i=(n.children||[]).findIndex(x=>x.id=
 
 async function loadCodeBank(){
   if(codeItems.length)return codeItems;
-  const urls=[
-    './code-bank.min.json',
-    './code-bank.json',
-    'https://raw.githubusercontent.com/tttosnown/zhu-xi/main/code-bank.min.json',
-    'https://raw.githubusercontent.com/tttosnown/zhu-xi/main/code-bank.json'
-  ];
-  const errors=[];
-  for(const u of urls){
-    try{
-      const r=await fetch(u+'?v='+Date.now(),{cache:'no-store'});
-      if(!r.ok){errors.push(u+' → HTTP '+r.status);continue}
-      const text=await r.text();
-      let d;
-      try{d=JSON.parse(text)}catch(e){errors.push(u+' → JSON解析失败');continue}
-      const arr=Array.isArray(d)?d:(d.items||d.questions||d.data||[]);
-      if(Array.isArray(arr)&&arr.length){codeItems=arr;return arr}
-      errors.push(u+' → 数据为空或格式不识别');
-    }catch(e){errors.push(u+' → '+(e.message||'网络读取失败'))}
-  }
-  throw new Error('规范题库加载失败。已尝试本地文件和 GitHub Raw。\n'+errors.join('\n'));
+  if(codeBankPromise)return codeBankPromise;
+  codeBankPromise=(async()=>{
+    const urls=['./code-bank.min.json','./code-bank.json','https://raw.githubusercontent.com/tttosnown/zhu-xi/main/code-bank.min.json','https://raw.githubusercontent.com/tttosnown/zhu-xi/main/code-bank.json'];
+    const errors=[];
+    for(const u of urls){
+      try{
+        const r=await fetch(u,{cache:'default'});
+        if(!r.ok){errors.push(u+' → HTTP '+r.status);continue}
+        const text=await r.text();
+        let d; try{d=JSON.parse(text)}catch(e){errors.push(u+' → JSON解析失败');continue}
+        const arr=Array.isArray(d)?d:(d.items||d.questions||d.data||[]);
+        if(Array.isArray(arr)&&arr.length){codeItems=arr;return arr}
+        errors.push(u+' → 数据为空或格式不识别');
+      }catch(e){errors.push(u+' → '+(e.message||'网络读取失败'))}
+    }
+    codeBankPromise=null;
+    throw new Error('规范题库加载失败。已尝试本地文件和 GitHub Raw。\n'+errors.join('\n'));
+  })();
+  return codeBankPromise;
 }
 function normalizeQ(q){return{title:q.title||q.section_id||q.chapter_id||q.type||'规范考点',content:q.content||q.prompt||q.question||q.q||'',answer:q.answer||q.a||q.explanation||'',refs:q.references||q.reference||q.refs||[],page:q.page}}
 async function loadDailyCodeQuestion(){let title=document.getElementById('codeQTitle'),content=document.getElementById('codeQContent'),answer=document.getElementById('codeQAnswer');try{let a=await loadCodeBank();let pool=a.filter(x=>['微考点','条文拆分','条款拆分'].includes(x.granularity));if(!pool.length)pool=a;let last=localStorage.getItem('zhuxi_last_code_id');let candidates=pool.filter(x=>String(x.id)!==String(last));if(!candidates.length)candidates=pool;let raw=candidates[Math.floor(Math.random()*candidates.length)];localStorage.setItem('zhuxi_last_code_id',raw.id);let q=normalizeQ(raw);currentCode=q;title.textContent=q.title;content.textContent=q.content;answer.innerHTML='<b>参考答案：</b>'+esc(q.answer)+(Array.isArray(q.refs)&&q.refs.length?'<br><br><b>规范参照：</b>'+q.refs.map(esc).join('<br>'):'')+(q.page!=null?`<br><span class="muted">PDF 第 ${esc(q.page)} 页</span>`:'');answer.style.display='none'}catch(e){title.textContent='规范题库加载失败';content.textContent=e.message}}
 function toggleCodeAnswer(){let e=document.getElementById('codeQAnswer');e.style.display=e.style.display==='none'?'block':'none'}
-async function searchNorms(){let box=document.getElementById('searchResults');try{let a=await loadCodeBank(),k=(document.getElementById('searchInput').value||'').trim().toLowerCase();let res=a.filter(q=>{let s=JSON.stringify(q).toLowerCase();return !k||s.includes(k)});box.innerHTML=`<div class="muted" style="padding:4px 2px 8px">正式规范题库：${a.length} 条${k?'，匹配 '+res.length+' 条':''}</div>`+res.slice(0,100).map((q,i)=>{let n=normalizeQ(q);return `<div class="search-result"><b>${esc(n.title)}</b><div style="margin-top:4px">${esc(n.content)}</div><div class="actions"><button class="edit-btn" onclick="showCodeAnswer(${i},${JSON.stringify(res).replace(/</g,'\\u003c')})">查看答案</button></div></div>`}).join('')||'<div style="padding:10px;color:#FF3B30">未找到相关题目。</div>'}catch(e){box.innerHTML='<div style="padding:10px;color:#FF3B30">'+esc(e.message)+'</div>'}}
-function showCodeAnswer(i,arr){let n=normalizeQ(arr[i]);document.getElementById('genericTitle').textContent=n.title;document.getElementById('genericBody').innerHTML='<p>'+esc(n.content)+'</p><hr style="margin:10px 0;border:0;border-top:.5px solid var(--line)"><p><b>参考答案：</b>'+esc(n.answer)+'</p>'+(n.refs?.length?'<p style="margin-top:8px"><b>规范参照：</b><br>'+n.refs.map(esc).join('<br>')+'</p>':'')+(n.page!=null?`<p class="muted" style="margin-top:8px">PDF 第 ${esc(n.page)} 页</p>`:'');document.getElementById('genericModal').classList.add('active')}
+async function searchNorms(){let box=document.getElementById('searchResults');try{let a=await loadCodeBank(),k=(document.getElementById('searchInput').value||'').trim().toLowerCase();let res=a.filter(q=>{if(!k)return true;let fields=[q.title,q.section_id,q.chapter_id,q.type,q.content,q.prompt,q.question,q.q,q.answer,q.a,q.explanation,q.reference,q.refs,q.references];return fields.some(v=>String(v??'').toLowerCase().includes(k))});normSearchResults=res;let shown=res.slice(0,100);box.innerHTML=`<div class="muted" style="padding:4px 2px 8px">正式规范题库：${a.length} 条${k?'，匹配 '+res.length+' 条':''}</div>`+shown.map((q,i)=>{let n=normalizeQ(q);return `<div class="search-result"><b>${esc(n.title)}</b><div style="margin-top:4px">${esc(n.content)}</div><div class="actions"><button class="edit-btn" onclick="showCodeAnswer(${i})">查看答案</button></div></div>`}).join('')||'<div style="padding:10px;color:#FF3B30">未找到相关题目。</div>'}catch(e){box.innerHTML='<div style="padding:10px;color:#FF3B30">'+esc(e.message)+'</div>'}}
+function showCodeAnswer(i,arr=normSearchResults){let n=normalizeQ(arr[i]);document.getElementById('genericTitle').textContent=n.title;document.getElementById('genericBody').innerHTML='<p>'+esc(n.content)+'</p><hr style="margin:10px 0;border:0;border-top:.5px solid var(--line)"><p><b>参考答案：</b>'+esc(n.answer)+'</p>'+(n.refs?.length?'<p style="margin-top:8px"><b>规范参照：</b><br>'+n.refs.map(esc).join('<br>')+'</p>':'')+(n.page!=null?`<p class="muted" style="margin-top:8px">PDF 第 ${esc(n.page)} 页</p>`:'');document.getElementById('genericModal').classList.add('active')}
 
 function openEnglishModal(id=null){editingEnglishId=id;if(id!=null){let e=englishErrors.find(x=>String(x.id)===String(id));if(!e)return;document.getElementById('englishModalTitle').textContent='✏️ 编辑英语错误';errType.value=e.type||'其他';errReason.value=e.reason||'';errTip.value=e.tip||''}else{document.getElementById('englishModalTitle').textContent='📖 记录英语错误';errType.value='选项辨析';errReason.value='';errTip.value=''}document.getElementById('englishModal').classList.add('active')}
 function closeEnglishModal(){document.getElementById('englishModal').classList.remove('active');editingEnglishId=null}
