@@ -104,23 +104,23 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">2.0</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">3.0</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
 
 <div id="sideMenuOverlay" class="side-menu-overlay" onclick="if(event.target===this)closeSideMenu()">
   <aside class="side-menu" onclick="event.stopPropagation()">
     <button class="side-menu-close" aria-label="关闭菜单" onclick="closeSideMenu()">×</button>
     <h3>筑习菜单</h3>
-    <div id="sideAuthHint" class="side-menu-note">账号与数据同步</div>
+    <div id="sideAuthHint" class="side-menu-note">本地优先：数据只保存在你的设备，不需要账号。</div>
     <button id="sideInstallBtn" class="side-menu-btn" onclick="closeSideMenu();installApp()">📱　安装到桌面</button>
-    <button id="sideAuthBtn" class="side-menu-btn" onclick="closeSideMenu();openAuthModal()">☁️　登录 / 注册</button>
-    <button class="side-menu-btn" onclick="closeSideMenu();exportDataJSON()">📤　导出数据</button>
+    <button class="side-menu-btn" onclick="closeSideMenu();openDataManager()">💾　数据与备份</button>
+    <button class="side-menu-btn" onclick="closeSideMenu();exportDataJSON()">📤　导出备份</button>
   </aside>
 </div>
 
 <div class="container">
 <section id="tab-dashboard" class="tab-content active">
 <div class="card"><h2>📅 本周 Routine 色块看板 <span class="muted">点击日期查看详情</span></h2><div class="routine-grid" id="routineGridContainer"></div></div>
-<div class="card"><h2>📈 累计学习与月历全景 <span class="muted" id="currentMonthTitle"></span></h2><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="month-grid" id="monthGridContainer"></div></div>
+<div class="card"><h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px">📈 累计学习与月历全景 <span style="display:flex;align-items:center;gap:6px"><button class="btn btn-small btn-secondary" onclick="changeMonth(-1)">‹</button><span class="muted" id="currentMonthTitle"></span><button class="btn btn-small btn-secondary" onclick="changeMonth(1)">›</button></span></h2><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="month-grid" id="monthGridContainer"></div></div>
 <div class="card">
 <h2>📊 学习数据 <span class="muted">自动从你的任务记录统计</span></h2>
 <div id="studyStats"></div>
@@ -145,177 +145,69 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 <section id="tab-vulnerability" class="tab-content"><div class="card"><h2>🎲 Random <span class="muted">到期回忆</span></h2><p class="muted">低熟悉度知识点会在间隔后自动进入这里，优先处理低分和久未复习内容。</p><div id="randomList"></div></div><div class="card"><h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openVulnerabilityModal()">+ 记个小漏洞</button></h2><p class="muted" style="margin-bottom:8px">记录知道但无法完整复述的知识点。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="vulnerabilityListContainer"></div></div></section>
 
 <section id="tab-familiarity" class="tab-content"><div class="card"><h2>📈 熟悉度追踪 <span class="muted">长期变化</span></h2><p class="muted" style="margin-bottom:10px">这里只统计已经完成过五题回忆的知识点。每次回忆都会留下历史记录。</p><div class="fam-filter"><input id="famSearch" placeholder="搜索知识点" oninput="renderFamiliarity()"><select id="famSort" onchange="renderFamiliarity()"><option value="low">当前熟悉度最低</option><option value="recent">最近测试</option><option value="old">最久未测试</option><option value="count">测试次数最多</option></select></div><div id="familiarityList" style="margin-top:10px"></div></div><div class="card"><h2>📌 熟悉度说明</h2><p class="muted" style="line-height:1.7">五题平均分会转换为百分制。历史记录不会被新一次回忆覆盖，因此可以观察“记住 → 遗忘 → 再记住”的变化。</p></div></section><section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="weeklyChart"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div><div class="card"><h2>📅 月度学习总结</h2><div id="monthlySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="monthlyChart"></div><button class="btn btn-secondary" onclick="renderMonthlySummary()">🔄 刷新月报数据</button></div>
-<div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">默认本地保存；登录后会自动同步到云端，可在多个设备使用同一账号。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
+<div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">本版本不需要登录。所有学习记录自动保存在本设备；建议定期备份，换手机时可导入恢复。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="openDataManager()" style="margin-bottom:10px">💾 数据与备份</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
 </div>
 
-<div id="genericModal" class="modal"><div class="modal-content"><h2 id="genericTitle" style="margin-bottom:10px"></h2><div id="genericBody"></div><button class="btn btn-secondary" onclick="closeModal()" style="margin-top:15px">关闭</button></div></div>
+<div id="genericModal" class="modal"><div class="modal-content"><h2 id="genericTitle" style="margin-bottom:10px"></h2><div id="genericBody"></div><button class="btn btn-secondary" onclick="closeModal()" style="margin-top:15px">关闭</button></div></div><input id="importFileInput" type="file" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
 
-<div id="englishModal" class="modal"><div class="modal-content"><h2 id="englishModalTitle">📖 记录英语错误</h2><label class="muted">① 错误类型：</label><select id="errType"><option>选项辨析</option><option>细节定位</option><option>词义/熟词僻义</option><option>长难句理解</option><option>逻辑判断</option><option>粗心/误读</option><option>其他</option></select><label class="muted">② 为什么错？</label><textarea id="errReason" rows="3"></textarea><label class="muted">③ 下次提醒：</label><input id="errTip"><div style="display:flex;gap:10px"><button class="btn" onclick="saveEnglishError()">保存</button><button class="btn btn-secondary" onclick="closeEnglishModal()">取消</button></div></div></div>
+<div id="englishModal" class="modal"><div class="modal-content"><h2 id="englishModalTitle">📖 记录英语错误</h2><label class="muted">① 错误类型：</label><select id="errType"><option>选项辨析</option><option>细节定位</option><option>词义/熟词僻义</option><option>长难句理解</option><option>逻辑判断</option><option>粗心/误读</option><option>其他</option></select><label class="muted">② 错误次数：</label><input id="errCount" type="number" min="1" max="999" step="1" value="1" inputmode="numeric"><label class="muted">③ 为什么错？</label><textarea id="errReason" rows="3"></textarea><label class="muted">④ 下次提醒：</label><input id="errTip"><div style="display:flex;gap:10px"><button class="btn" onclick="saveEnglishError()">保存</button><button class="btn btn-secondary" onclick="closeEnglishModal()">取消</button></div></div></div>
 
 <div id="recallModal" class="modal recall-lock"><div class="modal-content" style="position:relative"><button class="recall-close" aria-label="退出五题回忆检测" onclick="closeRecall()">×</button><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
 <div id="vulnModal" class="modal"><div class="modal-content"><h2 id="vulnModalTitle">🧠 记个未完全掌握的细节点</h2><label class="muted">细节点描述：</label><textarea id="vulnDesc" rows="4"></textarea><div style="display:flex;gap:10px"><button class="btn" onclick="saveVulnerability()">保存</button><button class="btn btn-secondary" onclick="closeVulnerabilityModal()">取消</button></div></div></div>
 
-<div id="authModal" class="modal" onclick="if(event.target===this)closeAuthModal()"><div class="modal-content">
-<h2 id="authTitle" style="margin-bottom:10px">☁️ 登录筑习</h2>
-<p id="authStatus" class="muted" style="margin-bottom:12px">登录后，学习记录可在多个设备同步。</p>
-<input id="authEmail" type="email" autocomplete="email" placeholder="邮箱">
-<input id="authPassword" type="password" autocomplete="current-password" placeholder="密码（至少 8 位）">
-<div id="authExtra" style="display:none"><input id="authPassword2" type="password" autocomplete="new-password" placeholder="再次输入密码"></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button id="authPrimaryBtn" class="btn" onclick="submitAuth()">登录</button>
-<button id="authSwitchBtn" class="btn btn-secondary" onclick="switchAuthMode()">注册账号</button>
-</div>
-<button id="resetBtn" class="btn btn-secondary" style="margin-top:8px" onclick="resetPassword()">忘记密码</button>
-<button class="btn btn-secondary" style="margin-top:8px" onclick="closeAuthModal()">关闭</button>
-</div></div>
-
 <nav class="tab-bar"><div class="tab-item active" onclick="switchTab('dashboard',this)"><span>📅</span>看板</div><div class="tab-item" onclick="switchTab('tree',this)"><span>🌳</span>知识树</div><div class="tab-item" onclick="switchTab('norms',this)"><span>🏛️</span>规范</div><div class="tab-item" onclick="switchTab('english',this)"><span>📖</span>英语</div><div class="tab-item" onclick="switchTab('vulnerability',this)"><span>🧠</span>专业漏洞</div><div class="tab-item" onclick="switchTab('familiarity',this)"><span>📈</span>熟悉度</div><div class="tab-item" onclick="switchTab('settings',this)"><span>📊</span>周报/设置</div></nav>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL='https://gvtftixbznfhqnwofpuf.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_5kjMfnZLn5Q4MsKNOVsMOg_lhGAZ-_-';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const KEY='zhuxi_v1_2_';
 const todayStr=new Date().toISOString().split('T')[0];
 const subjects=["建筑史","建筑理论","建筑物理","构造技术","英语","政治"];
 function getData(k,d){try{const v=localStorage.getItem(KEY+k);return v?JSON.parse(v):d}catch(e){return d}}
-function saveData(k,v){localStorage.setItem(KEY+k,JSON.stringify(v));scheduleSync()}
+
+// 筑习 3.0：本地优先存储。localStorage 负责兼容旧版本，IndexedDB 作为长期本地数据库副本。
+const ZHUXI_DB='zhuxi_local_v3', ZHUXI_STORE='snapshots';
+let dbPromise=null, idbTimer=null;
+function openZhuxiDB(){
+  if(!('indexedDB' in window)) return Promise.resolve(null);
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise(resolve=>{
+    const req=indexedDB.open(ZHUXI_DB,1);
+    req.onupgradeneeded=()=>{try{req.result.createObjectStore(ZHUXI_STORE)}catch(e){}};
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>resolve(null);
+  });
+  return dbPromise;
+}
+function makeLocalSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,distracts,familiarityHistory,version:3,updated_at:new Date().toISOString()}}
+function writeSnapshotToIDB(){
+  return openZhuxiDB().then(db=>{if(!db)return;return new Promise(resolve=>{
+    try{const tx=db.transaction(ZHUXI_STORE,'readwrite');tx.objectStore(ZHUXI_STORE).put(makeLocalSnapshot(),'current');tx.oncomplete=()=>resolve();tx.onerror=()=>resolve();}
+    catch(e){resolve()}
+  })});
+}
+function scheduleLocalDB(){clearTimeout(idbTimer);idbTimer=setTimeout(()=>writeSnapshotToIDB(),80)}
+function saveData(k,v){localStorage.setItem(KEY+k,JSON.stringify(v));scheduleLocalDB()}
+async function loadLocalSnapshot(){
+  const db=await openZhuxiDB(); if(!db)return false;
+  const snap=await new Promise(resolve=>{try{const tx=db.transaction(ZHUXI_STORE,'readonly');const r=tx.objectStore(ZHUXI_STORE).get('current');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null)}catch(e){resolve(null)}});
+  if(!snap)return false;
+  const localExists=['tasks','tree','english_errors','vulnerabilities','moods','coffees','distracts','familiarity_history'].some(k=>localStorage.getItem(KEY+k)!==null);
+  if(!localExists){
+    tasks=Array.isArray(snap.tasks)?snap.tasks:tasks; subjectTree=snap.subjectTree||subjectTree; englishErrors=Array.isArray(snap.englishErrors)?snap.englishErrors:englishErrors; vulnerabilities=Array.isArray(snap.vulnerabilities)?snap.vulnerabilities:vulnerabilities; moods=snap.moods||moods; coffees=snap.coffees||coffees; distracts=snap.distracts||distracts; familiarityHistory=Array.isArray(snap.familiarityHistory)?snap.familiarityHistory:familiarityHistory;
+    localStorage.setItem(KEY+'tasks',JSON.stringify(tasks));localStorage.setItem(KEY+'tree',JSON.stringify(subjectTree));localStorage.setItem(KEY+'english_errors',JSON.stringify(englishErrors));localStorage.setItem(KEY+'vulnerabilities',JSON.stringify(vulnerabilities));localStorage.setItem(KEY+'moods',JSON.stringify(moods));localStorage.setItem(KEY+'coffees',JSON.stringify(coffees));localStorage.setItem(KEY+'distracts',JSON.stringify(distracts));localStorage.setItem(KEY+'familiarity_history',JSON.stringify(familiarityHistory));
+  }
+  localStorage.setItem(KEY+'idb_migrated','1'); return true;
+}
 let tasks=getData('tasks',[]);
 let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",children:[{id:2,name:"建筑史",children:[]},{id:3,name:"建筑理论与设计",children:[]},{id:4,name:"建筑物理与构造",children:[]}]});
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
 let moods=getData('moods',{});
 let coffees=getData('coffees',{});
+let distracts=getData('distracts',{});
 let familiarityHistory=getData('familiarity_history',[]);
-let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
-let currentUser=null,authMode='login',syncTimer=null;
+let codeItems=[],codeBankPromise=null,currentCode=null,normLibrary=[],normLibraryPromise=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
+let localMode=true;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function openAuthModal(){
-  const modal=document.getElementById('authModal');
-  if(currentUser){
-    document.getElementById('authTitle').textContent='☁️ 筑习账号';
-    document.getElementById('authStatus').innerHTML=`已登录：<b>${esc(currentUser.email||'')}</b><br><span class="muted">学习数据会自动同步到云端。</span>`;
-    document.getElementById('authEmail').style.display='none';document.getElementById('authPassword').style.display='none';document.getElementById('authExtra').style.display='none';
-    document.getElementById('authPrimaryBtn').textContent='立即同步';document.getElementById('authPrimaryBtn').onclick=()=>syncToCloud(true);
-    document.getElementById('authSwitchBtn').textContent='退出登录';document.getElementById('authSwitchBtn').onclick=signOut;
-    document.getElementById('resetBtn').style.display='none';
-  }else{
-    document.getElementById('authEmail').style.display='block';document.getElementById('authPassword').style.display='block';document.getElementById('resetBtn').style.display='block';
-    setAuthMode('login');
-  }
-  modal.classList.add('active');
-}
-function closeAuthModal(){document.getElementById('authModal').classList.remove('active')}
-function setAuthMode(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'☁️ 登录筑习':'☁️ 注册筑习账号';document.getElementById('authStatus').textContent=mode==='login'?'登录后，学习记录可在多个设备同步。':'用邮箱和密码创建筑习账号。注册后请查收验证邮件。';document.getElementById('authPrimaryBtn').textContent=mode==='login'?'登录':'注册';document.getElementById('authPrimaryBtn').onclick=submitAuth;document.getElementById('authSwitchBtn').textContent=mode==='login'?'注册账号':'已有账号？登录';document.getElementById('authSwitchBtn').onclick=switchAuthMode;document.getElementById('authExtra').style.display=mode==='login'?'none':'block'}
-function switchAuthMode(){setAuthMode(authMode==='login'?'signup':'login')}
-async function submitAuth(){
-  const email=document.getElementById('authEmail').value.trim(),pw=document.getElementById('authPassword').value;
-  if(!email||!pw)return alert('请填写邮箱和密码。');
-  if(pw.length<8)return alert('密码至少需要 8 位。');
-  if(authMode==='signup'){
-    const pw2=document.getElementById('authPassword2').value;if(pw!==pw2)return alert('两次密码不一致。');
-    const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
-    if(error)return alert('注册失败：'+error.message);
-    if(data.session){currentUser=data.user;await afterLogin(true);alert('注册成功，已登录。');closeAuthModal()}
-    else alert('注册成功！请到邮箱点击验证链接，然后返回筑习登录。');
-  }else{
-    const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
-    if(error)return alert('登录失败：'+error.message);
-    currentUser=data.user;await afterLogin(false);closeAuthModal();
-  }
-}
-async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
-async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
-function updateAuthUI(){const text=currentUser?'☁ 已登录':'☁ 登录 / 注册';const b=document.getElementById('sideAuthBtn');if(b)b.textContent=text;const hint=document.getElementById('sideAuthHint');if(hint)hint.textContent=currentUser?('已登录：'+(currentUser.email||'当前账号')+' · 学习记录自动同步'):'登录后可在多个设备同步学习记录';}
-function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,familiarityHistory,version:2,updated_at:new Date().toISOString()}}
-function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
-async function syncFromCloud(){
-  if(!currentUser)return;
-  const {data,error}=await sb.from('user_app_state').select('payload,updated_at').eq('user_id',currentUser.id).maybeSingle();
-  if(error){console.warn(error);return}
-  const local=localSnapshot();
-  if(!data){await syncToCloud(true);return}
-  const cloud=data.payload||{};
-  const hasLocal=local.tasks.length||local.englishErrors.length||local.vulnerabilities.length;
-  const hasCloud=(cloud.tasks||[]).length||(cloud.englishErrors||[]).length||(cloud.vulnerabilities||[]).length;
-  if(!hasCloud&&hasLocal){await syncToCloud(true);return}
-  if(hasCloud){
-    tasks=mergeArray(local.tasks,cloud.tasks,'id');
-    englishErrors=mergeArray(local.englishErrors,cloud.englishErrors,'id');
-    vulnerabilities=mergeArray(local.vulnerabilities,cloud.vulnerabilities,'id');
-    moods={...(local.moods||{}),...(cloud.moods||{})};
-    coffees={...(local.coffees||{}),...(cloud.coffees||{})};
-    familiarityHistory=mergeArray(local.familiarityHistory,cloud.familiarityHistory,'id');
-    if(cloud.subjectTree&&JSON.stringify(cloud.subjectTree)!==JSON.stringify(local.subjectTree)) subjectTree=cloud.subjectTree;
-    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);saveData('coffees',coffees);saveData('familiarity_history',familiarityHistory);
-    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();
-    await syncToCloud(true);
-  }
-}
-async function syncToCloud(force=false){
-  if(!currentUser)return;
-  const payload=localSnapshot();
-  const {error}=await sb.from('user_app_state').upsert({user_id:currentUser.id,payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error){console.warn('云同步失败',error);if(force)alert('云同步失败：'+error.message);return false}
-  return true;
-}
-function scheduleSync(){if(!currentUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToCloud(false),700)}
-async function afterLogin(isNew){currentUser= currentUser || (await sb.auth.getUser()).data.user;updateAuthUI();if(!isNew)await syncFromCloud();else await syncToCloud(true);}
-async function initAuth(){
-  // Supabase email confirmation/password-reset links can return either a ?code=...
-  // callback or an access-token hash. The Supabase client handles the session
-  // exchange automatically; we then refresh the UI and sync the account.
-  try{
-    const url=new URL(window.location.href);
-    const hasAuthParams=
-      url.searchParams.has('code') ||
-      url.searchParams.has('error') ||
-      url.hash.includes('access_token=') ||
-      url.hash.includes('refresh_token=');
-
-    if(hasAuthParams){
-      // Give Supabase a moment to finish its URL callback/session exchange.
-      await new Promise(r=>setTimeout(r,150));
-      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
-      if(sessionError)console.warn('Auth callback:',sessionError);
-      if(sessionData?.session){
-        currentUser=sessionData.session.user;
-        updateAuthUI();
-        // Remove callback parameters so refreshing the page does not repeat them.
-        const cleanUrl=new URL(window.location.href);
-        cleanUrl.searchParams.delete('code');
-        cleanUrl.searchParams.delete('error');
-        cleanUrl.searchParams.delete('error_code');
-        cleanUrl.searchParams.delete('error_description');
-        cleanUrl.searchParams.delete('type');
-        cleanUrl.hash='';
-        window.history.replaceState({},document.title,cleanUrl.pathname+cleanUrl.search);
-        await syncFromCloud();
-        alert('邮箱验证成功，筑习账号已确认。');
-      }else if(url.searchParams.has('error')){
-        alert('邮箱验证失败：'+(url.searchParams.get('error_description')||url.searchParams.get('error')||'未知错误'));
-      }
-    }
-
-    const {data}=await sb.auth.getSession();
-    if(data.session){
-      currentUser=data.session.user;
-      updateAuthUI();
-      await syncFromCloud();
-    }
-  }catch(e){console.warn('Auth init failed',e)}
-
-  sb.auth.onAuthStateChange(async (_event,session)=>{
-    currentUser=session?.user||null;
-    updateAuthUI();
-    if(session && _event==='SIGNED_IN'){
-      // The SIGNED_IN event is also emitted after email confirmation.
-      await syncFromCloud();
-    }
-  });
-}
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability'){renderVulnerabilities();renderRandom()}if(id==='familiarity')renderFamiliarity();if(id==='settings'){renderWeeklySummary();renderMonthlySummary()}}
 function renderDashboard(){renderRoutine();renderMonth();renderTasks();renderStudyStats()}
 function renderStudyStats(){
@@ -360,16 +252,19 @@ const MOODS=[
   {id:'angry',name:'生气'},
   {id:'breakdown',name:'崩溃'}
 ];
+let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function changeMonth(delta){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);renderMonth()}
+function bindCalendarSwipe(){const c=document.getElementById('monthGridContainer');if(!c||c.dataset.swipeBound)return;c.dataset.swipeBound='1';let sx=0,sy=0;c.addEventListener('touchstart',e=>{if(e.touches.length===1){sx=e.touches[0].clientX;sy=e.touches[0].clientY}},{passive:true});c.addEventListener('touchend',e=>{if(!sx)return;let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=sy=0;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2)changeMonth(dx<0?1:-1)},{passive:true})}
 function renderMonth(){
-  let now=new Date(),y=now.getFullYear(),mo=now.getMonth(),c=document.getElementById('monthGridContainer');
+  let y=calendarCursor.getFullYear(),mo=calendarCursor.getMonth(),c=document.getElementById('monthGridContainer');
   document.getElementById('currentMonthTitle').textContent=`${y}年${mo+1}月`;
   let first=new Date(y,mo,1).getDay(),off=first===0?6:first-1,days=new Date(y,mo+1,0).getDate(),h='';
   for(let i=0;i<off;i++)h+='<div class="month-cell" style="opacity:.3"></div>';
   for(let d=1;d<=days;d++){
-    let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds),mood=moods[ds],coffee=coffees[ds];
-    h+=`<div class="month-cell ${mood||coffee?'has-mood':''}" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div><div class="month-mood">${mood?moodFace(mood,true):''}${coffee?'<span style="font-size:15px;margin-left:2px">☕</span>':''}</div></div>`
+    let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds),mood=moods[ds],coffee=coffees[ds],distract=distracts[ds];
+    h+=`<div class="month-cell ${mood||coffee||distract!==undefined?'has-mood':''}" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div><div class="month-mood">${mood?moodFace(mood,true):''}${coffee?'<span style="font-size:15px;margin-left:2px">☕</span>':''}${distract!==undefined?`<span style="font-size:11px;margin-left:2px">📱${distract}</span>`:''}</div></div>`
   }
-  c.innerHTML=h
+  c.innerHTML=h;bindCalendarSwipe()
 }
 function renderTasks(){let c=document.getElementById('taskListContainer');let todayTasks=tasks.filter(t=>t.date===todayStr);if(!todayTasks.length){c.innerHTML='<div class="muted" style="text-align:center;padding:10px">今日暂无任务，点击上方添加。</div>';return}c.innerHTML=todayTasks.map(t=>`<div class="swipe-wrap" data-swipe><div class="swipe-actions"><button class="swipe-action edit" onclick="editTask(${t.id})">修改</button><button class="swipe-action delete" onclick="deleteTask(${t.id})">删除</button></div><div class="task-item swipe-content"><div class="task-row"><div class="task-info"><span class="badge">${esc(t.subject||'通用')}</span><span>${esc(t.title)}</span></div><button class="btn btn-small ${t.completed?'btn-secondary':''}" onclick="toggleTask(${t.id})">${t.completed?'✓ 已完成':'完成'}</button></div><div class="muted" style="margin-top:5px">难度：${'★'.repeat(t.difficulty||3)}　熟悉度：${t.mastery??'—'}%</div>${/英语|政治/.test(String(t.subject||''))?'':`<button class="btn btn-small" style="margin-top:8px" onclick="startRecall(${t.id})">🧠 五题回忆检测</button>`}<div class="swipe-hint">← 左滑管理</div></div></div>`).join('');initSwipeRows()}
 function taskForm(t){return `<input id="newTaskTitle" placeholder="任务名称" value="${esc(t?.title||'')}"><select id="newTaskSubject">${subjects.map(s=>`<option ${s===(t?.subject||subjects[0])?'selected':''}>${esc(s)}</option>`).join('')}</select><div style="margin-top:8px"><label class="muted">星级：</label><select id="newTaskDifficulty">${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===(t?.difficulty||3)?'selected':''}>${'★'.repeat(n)}</option>`).join('')}</select></div><div style="margin-top:8px"><label class="muted">日期：</label><input id="newTaskDate" type="date" value="${t?.date||todayStr}"></div>`}function editTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;document.getElementById('genericTitle').textContent='✏️ 修改学习任务';document.getElementById('genericBody').innerHTML=taskForm(t)+`<button class="btn" onclick="saveEditedTask(${t.id})" style="margin-top:10px">保存修改</button>`;document.getElementById('genericModal').classList.add('active');closeAllSwipeRows()}
@@ -378,7 +273,7 @@ function deleteTask(id){if(!confirm('确认删除这个学习任务吗？'))retu
 function toggleTask(id){tasks=tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t);saveData('tasks',tasks);renderDashboard()}
 function coffeeSummary(c){if(!c)return '';let t=c.type==='custom'?(c.customType||'自定义'):c.type;return `已记录：☕ ${esc(t)} · ${c.count||1} 杯${c.time?' · '+esc(c.time):''}`}
 function openDay(ds){
-  let ts=tasks.filter(t=>t.date===ds),current=moods[ds]||'',coffee=coffees[ds]||null;
+  let ts=tasks.filter(t=>t.date===ds),current=moods[ds]||'',coffee=coffees[ds]||null,distract=distracts[ds];
   document.getElementById('genericTitle').textContent='📅 '+ds;
   document.getElementById('genericBody').innerHTML=
     (ts.length?ts.map(t=>`<div class="search-result"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.subject)} · ${t.completed?'已完成':'未完成'} · 熟悉度 ${t.mastery??'—'}%</span></div>`).join(''):'<p class="muted">当天无任务。</p>')+
@@ -387,6 +282,12 @@ function openDay(ds){
       <div class="mood-picker">${MOODS.map(m=>`<button class="mood-option ${current===m.id?'selected':''}" onclick="selectMood('${ds}','${m.id}')">${moodFace(m.id)}<span>${m.name}</span></button>`).join('')}</div>
       <div class="mood-note">${current?'已记录：'+MOODS.find(m=>m.id===current)?.name+' · 点击其他表情即可修改':'还没有记录今天的心情'}</div>
       ${current?`<button class="btn btn-secondary btn-small" style="margin-top:9px;width:100%" onclick="clearMood('${ds}')">清除当天心情</button>`:''}
+    </div>
+    <div style="margin-top:14px;padding-top:12px;border-top:.5px solid var(--line)">
+      <b style="font-size:13px">📱 Distract · 今天学习时被手机/其他事情干扰的程度</b>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:9px">${[0,1,2,3,4,5].map(n=>`<button class="btn btn-small ${distract===n?'':'btn-secondary'}" onclick="setDistract('${ds}',${n})">${n}</button>`).join('')}</div>
+      <div class="mood-note">${distract!==undefined?`已记录：${distract} 分 · 点击其他分数即可修改`:'还没有记录今天的 Distract'}</div>
+      ${distract!==undefined?`<button class="btn btn-secondary btn-small" style="margin-top:9px;width:100%" onclick="clearDistract('${ds}')">清除当天 Distract 记录</button>`:''}
     </div>
     <div style="margin-top:14px;padding-top:12px;border-top:.5px solid var(--line)">
       <b style="font-size:13px">☕ 今天喝咖啡了吗？</b>
@@ -402,6 +303,8 @@ function toggleCoffeeCustom(ds){let type=document.getElementById('coffeeType_'+d
 function saveCoffee(ds){let type=document.getElementById('coffeeType_'+ds)?.value||'美式',customType=document.getElementById('coffeeCustom_'+ds)?.value.trim()||'',count=Number(document.getElementById('coffeeCount_'+ds)?.value||1),time=document.getElementById('coffeeTime_'+ds)?.value||'';if(type==='custom'&&!customType)return alert('请输入自定义咖啡名称');coffees[ds]={type,count,time,customType:type==='custom'?customType:''};saveData('coffees',coffees);renderMonth();openDay(ds)}
 function setCoffeeNone(ds){delete coffees[ds];saveData('coffees',coffees);renderMonth();openDay(ds)}
 function clearCoffee(ds){if(!confirm('确认删除当天的咖啡记录吗？'))return;delete coffees[ds];saveData('coffees',coffees);renderMonth();openDay(ds)}
+function setDistract(ds,score){distracts[ds]=Math.max(0,Math.min(5,Number(score)));saveData('distracts',distracts);renderMonth();openDay(ds)}
+function clearDistract(ds){if(!confirm('确认清除当天的 Distract 记录吗？'))return;delete distracts[ds];saveData('distracts',distracts);renderMonth();openDay(ds)}
 function selectMood(ds,id){moods[ds]=id;saveData('moods',moods);renderMonth();openDay(ds)}
 function clearMood(ds){delete moods[ds];saveData('moods',moods);renderMonth();openDay(ds)}
 function openTaskModal(){closeAllSwipeRows();document.getElementById('genericTitle').textContent='➕ 添加学习任务';document.getElementById('genericBody').innerHTML=taskForm()+`<button class="btn" onclick="saveNewTask()" style="margin-top:10px">保存任务</button>`;document.getElementById('genericModal').classList.add('active')}
@@ -473,15 +376,18 @@ async function loadCodeBank(){
 function normalizeQ(q){return{title:q.title||q.section_id||q.chapter_id||q.type||'规范考点',content:q.content||q.prompt||q.question||q.q||'',answer:q.answer||q.a||q.explanation||'',refs:q.references||q.reference||q.refs||[],page:q.page}}
 async function loadDailyCodeQuestion(){let title=document.getElementById('codeQTitle'),content=document.getElementById('codeQContent'),answer=document.getElementById('codeQAnswer');try{let a=await loadCodeBank();let pool=a.filter(x=>x.granularity==='挖空题');if(!pool.length)pool=a;let last=localStorage.getItem('zhuxi_last_code_id');let candidates=pool.filter(x=>String(x.id)!==String(last));if(!candidates.length)candidates=pool;let raw=candidates[Math.floor(Math.random()*candidates.length)];localStorage.setItem('zhuxi_last_code_id',raw.id);let q=normalizeQ(raw);currentCode=q;title.textContent=q.title;content.textContent=q.content;answer.innerHTML='<b>参考答案：</b>'+esc(q.answer);answer.style.display='none'}catch(e){title.textContent='规范题库加载失败';content.textContent=e.message}}
 function toggleCodeAnswer(){let e=document.getElementById('codeQAnswer');e.style.display=e.style.display==='none'?'block':'none'}
-async function searchNorms(){let box=document.getElementById('searchResults');try{let a=await loadCodeBank(),k=(document.getElementById('searchInput').value||'').trim().toLowerCase();let res=a.filter(q=>{if(!k)return true;let fields=[q.title,q.section_id,q.chapter_id,q.type,q.content,q.prompt,q.question,q.q,q.answer,q.a,q.explanation,q.reference,q.refs,q.references];return fields.some(v=>String(v??'').toLowerCase().includes(k))});normSearchResults=res;let shown=res.slice(0,100);box.innerHTML=`<div class="muted" style="padding:4px 2px 8px">正式规范题库：${a.length} 条${k?'，匹配 '+res.length+' 条':''}</div>`+shown.map((q,i)=>{let n=normalizeQ(q);return `<div class="search-result"><b>${esc(n.title)}</b><div style="margin-top:4px">${esc(n.content)}</div><div class="actions"><button class="edit-btn" onclick="showCodeAnswer(${i})">查看答案</button></div></div>`}).join('')||'<div style="padding:10px;color:#FF3B30">未找到相关题目。</div>'}catch(e){box.innerHTML='<div style="padding:10px;color:#FF3B30">'+esc(e.message)+'</div>'}}
+async function loadNormLibrary(){if(normLibrary.length)return normLibrary;if(normLibraryPromise)return normLibraryPromise;normLibraryPromise=(async()=>{const url=new URL('norm-library.json',document.baseURI).href;let r;try{r=await fetch(url,{cache:'no-store'});}catch(e){try{r=await fetch(url,{cache:'force-cache'});}catch(e2){throw new Error('规范查找库无法加载。请先刷新页面，或检查 GitHub Pages 是否已上传 norm-library.json。')}}if(!r.ok)throw new Error('规范查找库加载失败（HTTP '+r.status+'）。请确认 norm-library.json 已部署。');let d;try{d=await r.json()}catch(e){throw new Error('规范查找库文件损坏或不是有效 JSON。')}normLibrary=Array.isArray(d)?d:(d.standards||[]);if(!normLibrary.length)throw new Error('规范查找库为空。');return normLibrary})().catch(e=>{normLibraryPromise=null;throw e});return normLibraryPromise}
+function normPdfName(n){if(n.standard.includes('50016'))return 'GB50016-2018.pdf';if(n.standard.includes('50504'))return 'GB50504-2009.pdf';if(n.standard.includes('50096'))return 'GB50096-2011.pdf';if(n.standard.includes('50763'))return 'GB50763-2012.pdf';return ''}
+async function searchNorms(){let box=document.getElementById('searchResults');try{let a=await loadNormLibrary(),k=(document.getElementById('searchInput').value||'').trim().toLowerCase();let res=a.filter(q=>{if(!k)return true;let fields=[q.standard,q.chapter,q.article,q.text,...(q.keywords||[])];return fields.some(v=>String(v??'').toLowerCase().includes(k))});normSearchResults=res;let shown=res.slice(0,100);box.innerHTML=`<div class="muted" style="padding:4px 2px 8px">四本规范原文库：${a.length} 条${k?'，匹配 '+res.length+' 条':''}</div>`+shown.map((q,i)=>`<div class="search-result"><b>${esc(q.standard)}</b><div class="muted" style="margin-top:3px">第 ${esc(q.article)} 条 · 第 ${esc(q.pdfPage)} 页${q.keywords?.length?' · '+esc(q.keywords.join(' / ')):''}</div><div style="margin-top:5px;line-height:1.6">${esc(q.text)}</div><div class="actions"><button class="edit-btn" onclick="showNormSource(${i})">查看原文页</button></div></div>`).join('')||'<div style="padding:10px;color:#FF3B30">未找到相关条文。</div>'}catch(e){box.innerHTML='<div style="padding:10px;color:#FF3B30">'+esc(e.message)+'</div>'}}
+function showNormSource(i){let n=normSearchResults[i];if(!n)return;let pdf=normPdfName(n);document.getElementById('genericTitle').textContent=n.article+' · 原文';document.getElementById('genericBody').innerHTML=`<p><b>${esc(n.standard)}</b></p><p class="muted">第 ${esc(n.pdfPage)} 页</p><div style="margin-top:10px;line-height:1.7">${esc(n.text)}</div><button class="btn btn-secondary" style="margin-top:12px" onclick="window.open('./norm-pdfs/${pdf}#page=${n.pdfPage}','_blank')">📄 打开 PDF 原文第 ${n.pdfPage} 页</button>`;document.getElementById('genericModal').classList.add('active')}
 function showCodeAnswer(i,arr=normSearchResults){let n=normalizeQ(arr[i]);document.getElementById('genericTitle').textContent=n.title;document.getElementById('genericBody').innerHTML='<p>'+esc(n.content)+'</p><hr style="margin:10px 0;border:0;border-top:.5px solid var(--line)"><p><b>参考答案：</b>'+esc(n.answer)+'</p>';document.getElementById('genericModal').classList.add('active')}
 
-function openEnglishModal(id=null){editingEnglishId=id;if(id!=null){let e=englishErrors.find(x=>String(x.id)===String(id));if(!e)return;document.getElementById('englishModalTitle').textContent='✏️ 编辑英语错误';errType.value=e.type||'其他';errReason.value=e.reason||'';errTip.value=e.tip||''}else{document.getElementById('englishModalTitle').textContent='📖 记录英语错误';errType.value='选项辨析';errReason.value='';errTip.value=''}document.getElementById('englishModal').classList.add('active')}
+function openEnglishModal(id=null){editingEnglishId=id;if(id!=null){let e=englishErrors.find(x=>String(x.id)===String(id));if(!e)return;document.getElementById('englishModalTitle').textContent='✏️ 编辑英语错误';errType.value=e.type||'其他';document.getElementById('errCount').value=Math.max(1,Number(e.count)||1);errReason.value=e.reason||'';errTip.value=e.tip||''}else{document.getElementById('englishModalTitle').textContent='📖 记录英语错误';errType.value='选项辨析';document.getElementById('errCount').value=1;errReason.value='';errTip.value=''}document.getElementById('englishModal').classList.add('active')}
 function closeEnglishModal(){document.getElementById('englishModal').classList.remove('active');editingEnglishId=null}
-function saveEnglishError(){let reason=errReason.value.trim();if(!reason)return alert('请填写为什么错！');let obj={type:errType.value,reason,tip:errTip.value.trim()||'无'};if(editingEnglishId!=null)englishErrors=englishErrors.map(x=>String(x.id)===String(editingEnglishId)?{...x,...obj}:x);else englishErrors.unshift({id:Date.now(),date:todayStr,...obj});saveData('english_errors',englishErrors);closeEnglishModal();renderEnglishErrors()}
+function saveEnglishError(){let reason=errReason.value.trim();if(!reason)return alert('请填写为什么错！');let count=Math.max(1,Math.min(999,parseInt(document.getElementById('errCount').value,10)||1));let obj={type:errType.value,count,reason,tip:errTip.value.trim()||'无'};if(editingEnglishId!=null)englishErrors=englishErrors.map(x=>String(x.id)===String(editingEnglishId)?{...x,...obj}:x);else englishErrors.unshift({id:Date.now(),date:todayStr,...obj});saveData('english_errors',englishErrors);closeEnglishModal();renderEnglishErrors()}
 function deleteEnglishError(id){if(!confirm('确认删除这条英语错误记录吗？'))return;englishErrors=englishErrors.filter(x=>String(x.id)!==String(id));saveData('english_errors',englishErrors);renderEnglishErrors()}
-function renderEnglishErrors(){let c=document.getElementById('englishErrorListContainer');c.innerHTML=englishErrors.length?englishErrors.map(e=>`<div class="swipe-wrap" data-swipe><div class="swipe-actions"><button class="swipe-action edit" onclick="openEnglishModal('${esc(e.id)}')">修改</button><button class="swipe-action delete" onclick="deleteEnglishError('${esc(e.id)}')">删除</button></div><div class="card swipe-content" style="padding:10px;margin-bottom:0;background:#F9F9FB"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>📅 ${esc(e.date)}</span><span class="badge">${esc(e.type)}</span></div><div style="font-size:13px;margin-top:4px"><b>错因：</b>${esc(e.reason)}</div><div style="font-size:12px;color:#0369A1;margin-top:2px"><b>下次提醒：</b>${esc(e.tip)}</div><div class="swipe-hint">← 左滑管理</div></div></div>`).join(''):'<p class="muted" style="text-align:center;padding:10px">暂无英语错误记录。</p>';initSwipeRows()}
-function openEnglishMonthlySummaryModal(){let counts={};englishErrors.forEach(e=>counts[e.type]=(counts[e.type]||0)+1);let sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);document.getElementById('genericTitle').textContent='📊 英语月度错误总结';document.getElementById('genericBody').innerHTML=`<p><b>累计错误：</b>${englishErrors.length} 次</p><p style="margin-top:8px"><b>错误类型：</b></p><ul style="padding-left:20px">${sorted.map(x=>`<li>${esc(x[0])}：${x[1]} 次</li>`).join('')||'<li>暂无数据</li>'}</ul>`;document.getElementById('genericModal').classList.add('active')}
+function renderEnglishErrors(){let c=document.getElementById('englishErrorListContainer');c.innerHTML=englishErrors.length?englishErrors.map(e=>`<div class="swipe-wrap" data-swipe><div class="swipe-actions"><button class="swipe-action edit" onclick="openEnglishModal('${esc(e.id)}')">修改</button><button class="swipe-action delete" onclick="deleteEnglishError('${esc(e.id)}')">删除</button></div><div class="card swipe-content" style="padding:10px;margin-bottom:0;background:#F9F9FB"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>📅 ${esc(e.date)}</span><span class="badge">${esc(e.type)} · 错 ${Math.max(1,Number(e.count)||1)} 次</span></div><div style="font-size:13px;margin-top:4px"><b>错因：</b>${esc(e.reason)}</div><div style="font-size:12px;color:#0369A1;margin-top:2px"><b>下次提醒：</b>${esc(e.tip)}</div><div class="swipe-hint">← 左滑管理</div></div></div>`).join(''):'<p class="muted" style="text-align:center;padding:10px">暂无英语错误记录。</p>';initSwipeRows()}
+function openEnglishMonthlySummaryModal(){let counts={},total=0;englishErrors.forEach(e=>{let n=Math.max(1,Number(e.count)||1);total+=n;counts[e.type]=(counts[e.type]||0)+n});let sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);document.getElementById('genericTitle').textContent='📊 英语月度错误总结';document.getElementById('genericBody').innerHTML=`<p><b>错误记录：</b>${englishErrors.length} 条</p><p><b>累计错误次数：</b>${total} 次</p><p style="margin-top:8px"><b>错误类型：</b></p><ul style="padding-left:20px">${sorted.map(x=>`<li>${esc(x[0])}：${x[1]} 次</li>`).join('')||'<li>暂无数据</li>'}</ul>`;document.getElementById('genericModal').classList.add('active')}
 
 function openVulnerabilityModal(id=null){editingVulnId=id;if(id!=null){let v=vulnerabilities.find(x=>String(x.id)===String(id));if(!v)return;document.getElementById('vulnModalTitle').textContent='✏️ 编辑专业课漏洞';vulnDesc.value=v.desc||''}else{document.getElementById('vulnModalTitle').textContent='🧠 记个未完全掌握的细节点';vulnDesc.value=''}document.getElementById('vulnModal').classList.add('active')}
 function closeVulnerabilityModal(){document.getElementById('vulnModal').classList.remove('active');editingVulnId=null}
@@ -530,12 +436,20 @@ function renderMonthlySummary(){
   document.getElementById('monthlySummaryContent').innerHTML=`<div><b>${y}年${mo+1}月</b>：共 ${month.length} 项任务，完成 ${done} 项，完成率 <b>${rate}%</b>，平均掌握度 <b>${avg}%</b>。</div><div style="margin-top:8px;color:var(--sub);font-size:11px">按周观察学习量变化，帮助判断月底是否出现任务堆积或学习强度波动。</div>`;
   document.getElementById('monthlyChart').innerHTML=makeTrendChart(vals,labels,'本月每周任务趋势')
 }
-function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,familiarityHistory},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
-function clearAllData(){if(confirm('确定清空所有累计数据吗？')){localStorage.clear();location.reload()}}
+function currentExportObject(){return {app:'筑习',version:3,exported_at:new Date().toISOString(),tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,distracts,familiarityHistory}}
+function exportDataJSON(){const blob=new Blob([JSON.stringify(currentExportObject(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='筑习备份_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function importDataJSON(){document.getElementById('importFileInput').click()}
+async function handleImportFile(ev){const f=ev.target.files?.[0];ev.target.value='';if(!f)return;try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.tasks)||!d.subjectTree)throw new Error('备份文件格式不正确');if(!confirm('导入后将覆盖当前设备上的筑习数据，确定继续吗？'))return;tasks=d.tasks;subjectTree=d.subjectTree;englishErrors=Array.isArray(d.englishErrors)?d.englishErrors:[];vulnerabilities=Array.isArray(d.vulnerabilities)?d.vulnerabilities:[];moods=d.moods||{};coffees=d.coffees||{};distracts=d.distracts||{};familiarityHistory=Array.isArray(d.familiarityHistory)?d.familiarityHistory:[];['tasks','tree','english_errors','vulnerabilities','moods','coffees','distracts','familiarity_history'].forEach(k=>localStorage.removeItem(KEY+k));saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);saveData('coffees',coffees);saveData('distracts',distracts);saveData('familiarity_history',familiarityHistory);await writeSnapshotToIDB();renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();alert('恢复成功。')}catch(e){alert('导入失败：'+e.message)}}
+function openDataManager(){const body=`<div style="line-height:1.7;font-size:13px"><b>本地数据</b><br>学习记录会自动保存在当前设备，不需要登录。<br><span class="muted">数据库：IndexedDB（浏览器/App 本地）</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn" onclick="exportDataJSON();closeModal()">📤 导出备份</button><button class="btn btn-secondary" onclick="importDataJSON();closeModal()">📥 导入恢复</button></div><div class="muted" style="margin-top:12px;font-size:11px;line-height:1.6">建议在换手机、清理浏览器数据或重大版本更新前导出一次备份。</div>`;document.getElementById('genericTitle').textContent='💾 数据与备份';document.getElementById('genericBody').innerHTML=body;document.getElementById('genericModal').classList.add('active')}
+function clearAllData(){if(confirm('确定清空所有累计数据吗？此操作不可恢复，建议先导出备份。')){localStorage.clear();openZhuxiDB().then(db=>{try{if(db){const tx=db.transaction(ZHUXI_STORE,'readwrite');tx.objectStore(ZHUXI_STORE).clear()}}catch(e){}});location.reload()}}
 
-renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-initAuth().catch(e=>console.warn('Auth init failed',e));
+(async function bootZhuxi(){
+  await loadLocalSnapshot();
+  renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
+  // 首次启动/升级后立即建立 IndexedDB 快照。
+  await writeSnapshotToIDB();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
 </script>
 
 <div id="installHelpModal" class="modal" onclick="if(event.target===this)closeInstallHelp()">
