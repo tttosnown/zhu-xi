@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>筑习 - 建筑考研学习系统 v1.7.3</title>
+<title>筑习 - 建筑考研学习系统 v1.8</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#f6f6f3">
 <meta name="mobile-web-app-capable" content="yes">
@@ -62,7 +62,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.7.3</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.8</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" onclick="installApp()">安装到桌面</button><button id="authBtn" class="btn btn-small btn-secondary" onclick="openAuthModal()">登录 / 注册</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
 
 <div class="container">
 <section id="tab-dashboard" class="tab-content active">
@@ -92,7 +92,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 <section id="tab-vulnerability" class="tab-content"><div class="card"><h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openVulnerabilityModal()">+ 记个小漏洞</button></h2><p class="muted" style="margin-bottom:8px">记录知道但无法完整复述的知识点。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="vulnerabilityListContainer"></div></div></section>
 
 <section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div>
-<div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">所有数据均存储在本地浏览器。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
+<div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">默认本地保存；登录后会自动同步到云端，可在多个设备使用同一账号。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
 </div>
 
 <div id="genericModal" class="modal"><div class="modal-content"><h2 id="genericTitle" style="margin-bottom:10px"></h2><div id="genericBody"></div><button class="btn btn-secondary" onclick="closeModal()" style="margin-top:15px">关闭</button></div></div>
@@ -102,21 +102,112 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 <div id="recallModal" class="modal"><div class="modal-content"><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
 <div id="vulnModal" class="modal"><div class="modal-content"><h2 id="vulnModalTitle">🧠 记个未完全掌握的细节点</h2><label class="muted">细节点描述：</label><textarea id="vulnDesc" rows="4"></textarea><div style="display:flex;gap:10px"><button class="btn" onclick="saveVulnerability()">保存</button><button class="btn btn-secondary" onclick="closeVulnerabilityModal()">取消</button></div></div></div>
 
+<div id="authModal" class="modal" onclick="if(event.target===this)closeAuthModal()"><div class="modal-content">
+<h2 id="authTitle" style="margin-bottom:10px">☁️ 登录筑习</h2>
+<p id="authStatus" class="muted" style="margin-bottom:12px">登录后，学习记录可在多个设备同步。</p>
+<input id="authEmail" type="email" autocomplete="email" placeholder="邮箱">
+<input id="authPassword" type="password" autocomplete="current-password" placeholder="密码（至少 8 位）">
+<div id="authExtra" style="display:none"><input id="authPassword2" type="password" autocomplete="new-password" placeholder="再次输入密码"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button id="authPrimaryBtn" class="btn" onclick="submitAuth()">登录</button>
+<button id="authSwitchBtn" class="btn btn-secondary" onclick="switchAuthMode()">注册账号</button>
+</div>
+<button id="resetBtn" class="btn btn-secondary" style="margin-top:8px" onclick="resetPassword()">忘记密码</button>
+<button class="btn btn-secondary" style="margin-top:8px" onclick="closeAuthModal()">关闭</button>
+</div></div>
+
 <nav class="tab-bar"><div class="tab-item active" onclick="switchTab('dashboard',this)"><span>📅</span>看板</div><div class="tab-item" onclick="switchTab('tree',this)"><span>🌳</span>知识树</div><div class="tab-item" onclick="switchTab('norms',this)"><span>🏛️</span>规范</div><div class="tab-item" onclick="switchTab('english',this)"><span>📖</span>英语</div><div class="tab-item" onclick="switchTab('vulnerability',this)"><span>🧠</span>专业漏洞</div><div class="tab-item" onclick="switchTab('settings',this)"><span>📊</span>周报/设置</div></nav>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL='https://gvtftixbznfhqnwofpuf.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_5kjMfnZLn5Q4MsKNOVsMOg_lhGAZ-_-';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const KEY='zhuxi_v1_2_';
 const todayStr=new Date().toISOString().split('T')[0];
 const subjects=["建筑史","建筑理论","建筑物理","构造技术","英语","政治"];
 function getData(k,d){try{const v=localStorage.getItem(KEY+k);return v?JSON.parse(v):d}catch(e){return d}}
-function saveData(k,v){localStorage.setItem(KEY+k,JSON.stringify(v))}
+function saveData(k,v){localStorage.setItem(KEY+k,JSON.stringify(v));scheduleSync()}
 let tasks=getData('tasks',[]);
 let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",children:[{id:2,name:"建筑史",children:[]},{id:3,name:"建筑理论与设计",children:[]},{id:4,name:"建筑物理与构造",children:[]}]});
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
 let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
+let currentUser=null,authMode='login',syncTimer=null;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function openAuthModal(){
+  const modal=document.getElementById('authModal');
+  if(currentUser){
+    document.getElementById('authTitle').textContent='☁️ 筑习账号';
+    document.getElementById('authStatus').innerHTML=`已登录：<b>${esc(currentUser.email||'')}</b><br><span class="muted">学习数据会自动同步到云端。</span>`;
+    document.getElementById('authEmail').style.display='none';document.getElementById('authPassword').style.display='none';document.getElementById('authExtra').style.display='none';
+    document.getElementById('authPrimaryBtn').textContent='立即同步';document.getElementById('authPrimaryBtn').onclick=()=>syncToCloud(true);
+    document.getElementById('authSwitchBtn').textContent='退出登录';document.getElementById('authSwitchBtn').onclick=signOut;
+    document.getElementById('resetBtn').style.display='none';
+  }else{
+    document.getElementById('authEmail').style.display='block';document.getElementById('authPassword').style.display='block';document.getElementById('resetBtn').style.display='block';
+    setAuthMode('login');
+  }
+  modal.classList.add('active');
+}
+function closeAuthModal(){document.getElementById('authModal').classList.remove('active')}
+function setAuthMode(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'☁️ 登录筑习':'☁️ 注册筑习账号';document.getElementById('authStatus').textContent=mode==='login'?'登录后，学习记录可在多个设备同步。':'用邮箱和密码创建筑习账号。注册后请查收验证邮件。';document.getElementById('authPrimaryBtn').textContent=mode==='login'?'登录':'注册';document.getElementById('authPrimaryBtn').onclick=submitAuth;document.getElementById('authSwitchBtn').textContent=mode==='login'?'注册账号':'已有账号？登录';document.getElementById('authSwitchBtn').onclick=switchAuthMode;document.getElementById('authExtra').style.display=mode==='login'?'none':'block'}
+function switchAuthMode(){setAuthMode(authMode==='login'?'signup':'login')}
+async function submitAuth(){
+  const email=document.getElementById('authEmail').value.trim(),pw=document.getElementById('authPassword').value;
+  if(!email||!pw)return alert('请填写邮箱和密码。');
+  if(pw.length<8)return alert('密码至少需要 8 位。');
+  if(authMode==='signup'){
+    const pw2=document.getElementById('authPassword2').value;if(pw!==pw2)return alert('两次密码不一致。');
+    const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
+    if(error)return alert('注册失败：'+error.message);
+    if(data.session){currentUser=data.user;await afterLogin(true);alert('注册成功，已登录。');closeAuthModal()}
+    else alert('注册成功！请到邮箱点击验证链接，然后返回筑习登录。');
+  }else{
+    const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error)return alert('登录失败：'+error.message);
+    currentUser=data.user;await afterLogin(false);closeAuthModal();
+  }
+}
+async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
+async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
+function updateAuthUI(){const b=document.getElementById('authBtn');if(!b)return;b.textContent=currentUser?'☁ 已登录':'登录 / 注册';b.title=currentUser?(currentUser.email||'已登录'):'登录筑习'}
+function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,version:1,updated_at:new Date().toISOString()}}
+function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
+async function syncFromCloud(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('user_app_state').select('payload,updated_at').eq('user_id',currentUser.id).maybeSingle();
+  if(error){console.warn(error);return}
+  const local=localSnapshot();
+  if(!data){await syncToCloud(true);return}
+  const cloud=data.payload||{};
+  const hasLocal=local.tasks.length||local.englishErrors.length||local.vulnerabilities.length;
+  const hasCloud=(cloud.tasks||[]).length||(cloud.englishErrors||[]).length||(cloud.vulnerabilities||[]).length;
+  if(!hasCloud&&hasLocal){await syncToCloud(true);return}
+  if(hasCloud){
+    tasks=mergeArray(local.tasks,cloud.tasks,'id');
+    englishErrors=mergeArray(local.englishErrors,cloud.englishErrors,'id');
+    vulnerabilities=mergeArray(local.vulnerabilities,cloud.vulnerabilities,'id');
+    if(cloud.subjectTree&&JSON.stringify(cloud.subjectTree)!==JSON.stringify(local.subjectTree)) subjectTree=cloud.subjectTree;
+    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);
+    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();
+    await syncToCloud(true);
+  }
+}
+async function syncToCloud(force=false){
+  if(!currentUser)return;
+  const payload=localSnapshot();
+  const {error}=await sb.from('user_app_state').upsert({user_id:currentUser.id,payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){console.warn('云同步失败',error);if(force)alert('云同步失败：'+error.message);return false}
+  return true;
+}
+function scheduleSync(){if(!currentUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToCloud(false),700)}
+async function afterLogin(isNew){currentUser= currentUser || (await sb.auth.getUser()).data.user;updateAuthUI();if(!isNew)await syncFromCloud();else await syncToCloud(true);}
+async function initAuth(){
+  const {data}=await sb.auth.getSession();if(data.session){currentUser=data.session.user;updateAuthUI();await syncFromCloud()}
+  sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;updateAuthUI()});
+}
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings')renderWeeklySummary()}
 function renderDashboard(){renderRoutine();renderMonth();renderTasks();renderStudyStats()}
 function renderStudyStats(){
@@ -231,6 +322,7 @@ function clearAllData(){if(confirm('确定清空所有累计数据吗？')){loca
 
 renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();loadDailyCodeQuestion();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+initAuth().catch(e=>console.warn('Auth init failed',e));
 </script>
 
 <div id="installHelpModal" class="modal" onclick="if(event.target===this)closeInstallHelp()">
