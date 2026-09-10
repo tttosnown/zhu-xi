@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#F2F2F7">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <style>
-:root{--bg:#F2F2F7;--card:#FFF;--text:#1C1C1E;--sub:#8E8E93;--line:#C6C6C8;--accent:#007AFF;--green:#34C759;--red:#FF3B30;--r:12px}
+:root{--bg:#F2F2F7;--card:#FFF;--text:#1C1C1E;--sub:#8E8E93;--line:#C6C6C8;--accent:#000000;--green:#34C759;--red:#FF3B30;--r:12px}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;max-width:600px;margin:auto}
 header{background:rgba(255,255,255,.88);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;padding:16px 20px;border-bottom:.5px solid var(--line)}
@@ -96,14 +96,10 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .side-menu-note{font-size:12px;color:var(--sub);line-height:1.6;margin:8px 12px 18px}
 
 .recall-lock{touch-action:none}.recall-lock .modal-content{touch-action:auto}
-
-/* 筑习 2.0：顶部操作按钮统一黑底白字 */
-.top-actions button, .top-actions .btn, .menu-panel button, .menu-panel .btn { background:#111 !important; color:#fff !important; border-color:#111 !important; }
-.top-actions button:hover, .top-actions .btn:hover, .menu-panel button:hover, .menu-panel .btn:hover { background:#000 !important; color:#fff !important; }
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.8</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">2.0</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
 
 <div id="sideMenuOverlay" class="side-menu-overlay" onclick="if(event.target===this)closeSideMenu()">
   <aside class="side-menu" onclick="event.stopPropagation()">
