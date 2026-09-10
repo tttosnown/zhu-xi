@@ -116,12 +116,12 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 #startupSplash{position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;opacity:1;visibility:visible;transition:opacity .25s ease,visibility .25s ease}
 #startupSplash.hide{opacity:0;visibility:hidden;pointer-events:none}
 #startupSplashInner{display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateY(-2vh)}
-#startupSplash img{width:92px;height:92px;object-fit:contain;border-radius:22px;margin-bottom:16px}
+#startupSplash img{width:92px;height:92px;object-fit:contain;border-radius:22px;margin-bottom:16px}#startupSplashFallback{display:none;width:92px;height:92px;border-radius:22px;background:#f0f0f2;color:#111;align-items:center;justify-content:center;font-size:46px;font-weight:600;letter-spacing:-4px;margin-bottom:16px;border:1px solid #ddd}
 #startupSplashName{font-size:22px;letter-spacing:1.5px;color:#111;font-weight:500}
 </style>
 </head>
 <body>
-<div id="startupSplash" aria-label="zhuxi 启动封面"><div id="startupSplashInner"><img src="./icon-180.png" alt="筑习"><div id="startupSplashName">zhuxi</div></div></div>
+<div id="startupSplash" aria-label="zhuxi 启动封面"><div id="startupSplashInner"><img id="startupSplashIcon" src="./icon-180.png" alt="筑习" onerror="this.style.display='none';document.getElementById('startupSplashFallback').style.display='flex'"><div id="startupSplashFallback" aria-hidden="true">筑</div><div id="startupSplashName">zhuxi</div></div></div>
 <header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">3.0</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
 
 <div id="sideMenuOverlay" class="side-menu-overlay" onclick="if(event.target===this)closeSideMenu()">
@@ -539,6 +539,10 @@ function clearAllData(){if(confirm('确定清空所有累计数据吗？此操�
 
 (async function bootZhuxi(){
   await loadLocalSnapshot();
+  // 启动时强制以电脑本地今天为锚点，避免旧缓存/跨午夜导致周历停在错误位置。
+  todayStr=localDateString();
+  selectedDate=todayStr;
+  weekCursor=getMonday(todayStr);
   renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();startDateWatcher();
   // 首次启动/升级后立即建立 IndexedDB 快照。
   await writeSnapshotToIDB();
