@@ -82,10 +82,35 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .chart-empty{padding:22px 10px;text-align:center;color:var(--sub);font-size:12px}
 
 @media(max-width:480px){.study-stat-grid{grid-template-columns:repeat(3,1fr)}.study-stat{padding:8px 4px}.study-stat .num{font-size:18px}}
+
+/* 顶部三点菜单 */
+.header-actions{position:relative}
+.menu-trigger{width:36px!important;height:32px;padding:0!important;font-size:22px!important;line-height:28px}
+.side-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:2000;display:none}
+.side-menu-overlay.active{display:block}
+.side-menu{position:absolute;top:0;right:0;height:100%;width:min(280px,82vw);background:rgba(255,255,255,.98);backdrop-filter:blur(24px);box-shadow:-8px 0 30px rgba(0,0,0,.12);padding:70px 18px 24px;transform:translateX(100%);transition:transform .22s ease}
+.side-menu-overlay.active .side-menu{transform:translateX(0)}
+.side-menu h3{font-size:17px;margin-bottom:16px}
+.side-menu-btn{width:100%;display:flex;align-items:center;gap:10px;padding:13px 12px;margin-bottom:8px;border:0;border-radius:12px;background:#F2F2F7;color:var(--text);font-size:14px;text-align:left;cursor:pointer}
+.side-menu-close{position:absolute;top:18px;right:16px;width:34px;height:34px;border:0;border-radius:50%;background:#F2F2F7;font-size:22px;color:var(--sub)}
+.side-menu-note{font-size:12px;color:var(--sub);line-height:1.6;margin:8px 12px 18px}
+
+.recall-lock{touch-action:none}.recall-lock .modal-content{touch-action:auto}
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.8</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" onclick="installApp()">安装到桌面</button><button id="authBtn" class="btn btn-small btn-secondary" onclick="openAuthModal()">登录 / 注册</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.8</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
+
+<div id="sideMenuOverlay" class="side-menu-overlay" onclick="if(event.target===this)closeSideMenu()">
+  <aside class="side-menu" onclick="event.stopPropagation()">
+    <button class="side-menu-close" aria-label="关闭菜单" onclick="closeSideMenu()">×</button>
+    <h3>筑习菜单</h3>
+    <div id="sideAuthHint" class="side-menu-note">账号与数据同步</div>
+    <button id="sideInstallBtn" class="side-menu-btn" onclick="closeSideMenu();installApp()">📱　安装到桌面</button>
+    <button id="sideAuthBtn" class="side-menu-btn" onclick="closeSideMenu();openAuthModal()">☁️　登录 / 注册</button>
+    <button class="side-menu-btn" onclick="closeSideMenu();exportDataJSON()">📤　导出数据</button>
+  </aside>
+</div>
 
 <div class="container">
 <section id="tab-dashboard" class="tab-content active">
@@ -122,7 +147,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 
 <div id="englishModal" class="modal"><div class="modal-content"><h2 id="englishModalTitle">📖 记录英语错误</h2><label class="muted">① 错误类型：</label><select id="errType"><option>选项辨析</option><option>细节定位</option><option>词义/熟词僻义</option><option>长难句理解</option><option>逻辑判断</option><option>粗心/误读</option><option>其他</option></select><label class="muted">② 为什么错？</label><textarea id="errReason" rows="3"></textarea><label class="muted">③ 下次提醒：</label><input id="errTip"><div style="display:flex;gap:10px"><button class="btn" onclick="saveEnglishError()">保存</button><button class="btn btn-secondary" onclick="closeEnglishModal()">取消</button></div></div></div>
 
-<div id="recallModal" class="modal"><div class="modal-content"><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
+<div id="recallModal" class="modal recall-lock"><div class="modal-content"><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
 <div id="vulnModal" class="modal"><div class="modal-content"><h2 id="vulnModalTitle">🧠 记个未完全掌握的细节点</h2><label class="muted">细节点描述：</label><textarea id="vulnDesc" rows="4"></textarea><div style="display:flex;gap:10px"><button class="btn" onclick="saveVulnerability()">保存</button><button class="btn btn-secondary" onclick="closeVulnerabilityModal()">取消</button></div></div></div>
 
 <div id="authModal" class="modal" onclick="if(event.target===this)closeAuthModal()"><div class="modal-content">
@@ -196,7 +221,7 @@ async function submitAuth(){
 }
 async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
 async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
-function updateAuthUI(){const b=document.getElementById('authBtn');if(!b)return;b.textContent=currentUser?'☁ 已登录':'登录 / 注册';b.title=currentUser?(currentUser.email||'已登录'):'登录筑习'}
+function updateAuthUI(){const text=currentUser?'☁ 已登录':'☁ 登录 / 注册';const b=document.getElementById('sideAuthBtn');if(b)b.textContent=text;const hint=document.getElementById('sideAuthHint');if(hint)hint.textContent=currentUser?('已登录：'+(currentUser.email||'当前账号')+' · 学习记录自动同步'):'登录后可在多个设备同步学习记录';}
 function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,version:2,updated_at:new Date().toISOString()}}
 function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
 async function syncFromCloud(){
@@ -373,6 +398,16 @@ const recallQuestions=[
 '你是否能够在考场上独立、快速地把这个知识点完整输出，并应对相关追问？'
 ];
 let recallState={taskId:null,index:0,scores:[]};
+
+function toggleSideMenu(){document.getElementById('sideMenuOverlay').classList.toggle('active')}
+function closeSideMenu(){document.getElementById('sideMenuOverlay').classList.remove('active')}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    const m=document.getElementById('recallModal');
+    if(m&&m.classList.contains('active')){e.preventDefault();return;}
+    closeSideMenu();
+  }
+});
 function startRecall(id){let t=tasks.find(x=>x.id===id);if(!t)return;recallState={taskId:id,index:0,scores:Array.isArray(t.recall)?[...t.recall]:[]};if(recallState.scores.length!==5)recallState.scores=[null,null,null,null,null];document.getElementById('recallModal').classList.add('active');renderRecallQuestion()}
 function renderRecallQuestion(){let i=recallState.index,score=recallState.scores[i],labels=['完全不会','较差','一般','较好','非常熟练'];document.getElementById('recallProgress').textContent=`第 ${i+1} / 5 题 · 请先合上书，再判断自己的真实掌握程度`;document.getElementById('recallBody').innerHTML=`<div class="recall-question"><b>${i+1}️⃣ ${recallQuestions[i]}</b><div class="recall-options">${labels.map((x,n)=>`<button class="recall-opt ${score===n+1?'selected':''}" onclick="setRecallScore(${n+1})">${n+1}<br>${x}</button>`).join('')}</div></div><div class="recall-nav"><button class="btn btn-secondary" onclick="prevRecall()" ${i===0?'disabled':''}>上一题</button>${i<4?'<button class="btn" onclick="nextRecall()">下一题</button>':'<button class="btn" onclick="finishRecall()">生成熟悉度</button>'}</div>`}
 function setRecallScore(n){recallState.scores[recallState.index]=n;renderRecallQuestion()}
