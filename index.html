@@ -58,6 +58,29 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .week-bar-num{font-size:9px;color:var(--sub)}.week-bar-day{font-size:10px;color:var(--sub)}
 .subject-bars{display:grid;gap:7px}.subject-row{display:grid;grid-template-columns:72px 1fr 38px;gap:7px;align-items:center;font-size:11px}
 .subject-track{height:8px;background:var(--soft,#f2f2f5);border-radius:99px;overflow:hidden}.subject-fill{height:100%;border-radius:99px;background:var(--accent,#c9b5dc)}
+.mood-face{width:24px;height:24px;border-radius:50%;background:#f3a9c6;display:inline-flex;position:relative;align-items:center;justify-content:center;box-shadow:inset 0 -2px 0 rgba(180,75,120,.10);vertical-align:middle;flex:0 0 auto}
+.mood-face .eyes{position:absolute;top:7px;left:5px;right:5px;height:4px}
+.mood-face .eyes:before,.mood-face .eyes:after{content:"";position:absolute;width:3px;height:4px;background:#6d3d55;border-radius:50%}
+.mood-face .eyes:before{left:0}.mood-face .eyes:after{right:0}
+.mood-face .mouth{position:absolute;left:7px;right:7px;top:14px;height:5px;border-bottom:2px solid #6d3d55;border-radius:0 0 10px 10px}
+.mood-face.mood-tired .mouth{top:15px;border-bottom:0;border-top:2px solid #6d3d55;border-radius:10px 10px 0 0}
+.mood-face.mood-unwell .mouth{top:15px;height:3px;border-bottom:2px solid #6d3d55;border-radius:0}
+.mood-face.mood-bored .mouth{top:15px;border-bottom:2px solid #6d3d55;border-radius:0}
+.mood-face.mood-angry .mouth{top:15px;border-bottom:2px solid #6d3d55;border-radius:0;transform:rotate(8deg)}
+.mood-face.mood-breakdown .mouth{top:14px;height:7px;border:2px solid #6d3d55;border-radius:50%}
+.mood-face.mood-calm .mouth{top:15px;border-bottom:1.5px solid #6d3d55;border-radius:0}
+.mood-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.mood-option{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px 7px;text-align:center;cursor:pointer;font-size:11px;color:var(--text)}
+.mood-option.selected{border-color:#e58db2;background:#fff2f7;box-shadow:0 0 0 2px rgba(229,141,178,.14)}
+.mood-option .mood-face{display:flex;margin:0 auto 5px;width:30px;height:30px}
+.mood-note{font-size:12px;color:var(--sub);margin-top:10px}
+.month-mood{height:26px;display:flex;justify-content:center;align-items:center;margin-top:2px}
+.month-cell.has-mood{background:#fff6fa;border-color:#f1c2d5}
+.chart-panel{background:#fbf9fb;border:1px solid #eee7ee;border-radius:10px;padding:10px;margin-top:8px}
+.trend-svg{width:100%;height:150px;display:block}
+.trend-labels{display:grid;gap:2px;margin-top:2px;font-size:9px;color:var(--sub);text-align:center}
+.chart-empty{padding:22px 10px;text-align:center;color:var(--sub);font-size:12px}
+
 @media(max-width:480px){.study-stat-grid{grid-template-columns:repeat(3,1fr)}.study-stat{padding:8px 4px}.study-stat .num{font-size:18px}}
 </style>
 </head>
@@ -91,7 +114,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 
 <section id="tab-vulnerability" class="tab-content"><div class="card"><h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openVulnerabilityModal()">+ 记个小漏洞</button></h2><p class="muted" style="margin-bottom:8px">记录知道但无法完整复述的知识点。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="vulnerabilityListContainer"></div></div></section>
 
-<section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div>
+<section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="weeklyChart"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div><div class="card"><h2>📅 月度学习总结</h2><div id="monthlySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="monthlyChart"></div><button class="btn btn-secondary" onclick="renderMonthlySummary()">🔄 刷新月报数据</button></div>
 <div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">默认本地保存；登录后会自动同步到云端，可在多个设备使用同一账号。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
 </div>
 
@@ -132,6 +155,7 @@ let tasks=getData('tasks',[]);
 let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",children:[{id:2,name:"建筑史",children:[]},{id:3,name:"建筑理论与设计",children:[]},{id:4,name:"建筑物理与构造",children:[]}]});
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
+let moods=getData('moods',{});
 let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
 let currentUser=null,authMode='login',syncTimer=null;
 
@@ -173,7 +197,7 @@ async function submitAuth(){
 async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
 async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
 function updateAuthUI(){const b=document.getElementById('authBtn');if(!b)return;b.textContent=currentUser?'☁ 已登录':'登录 / 注册';b.title=currentUser?(currentUser.email||'已登录'):'登录筑习'}
-function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,version:1,updated_at:new Date().toISOString()}}
+function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,version:2,updated_at:new Date().toISOString()}}
 function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
 async function syncFromCloud(){
   if(!currentUser)return;
@@ -189,9 +213,10 @@ async function syncFromCloud(){
     tasks=mergeArray(local.tasks,cloud.tasks,'id');
     englishErrors=mergeArray(local.englishErrors,cloud.englishErrors,'id');
     vulnerabilities=mergeArray(local.vulnerabilities,cloud.vulnerabilities,'id');
+    moods={...(local.moods||{}),...(cloud.moods||{})};
     if(cloud.subjectTree&&JSON.stringify(cloud.subjectTree)!==JSON.stringify(local.subjectTree)) subjectTree=cloud.subjectTree;
-    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);
-    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();
+    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);
+    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();renderMonthlySummary();
     await syncToCloud(true);
   }
 }
@@ -257,7 +282,7 @@ async function initAuth(){
     }
   });
 }
-function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings')renderWeeklySummary()}
+function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings'){renderWeeklySummary();renderMonthlySummary()}}
 function renderDashboard(){renderRoutine();renderMonth();renderTasks();renderStudyStats()}
 function renderStudyStats(){
   const el=document.getElementById('studyStats'); if(!el)return;
@@ -288,13 +313,54 @@ function renderStudyStats(){
   `;
 }
 function renderRoutine(){let c=document.getElementById('routineGridContainer'),d=new Date(),dow=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dow+1);let names=['周一','周二','周三','周四','周五','周六','周日'];c.innerHTML=names.map((n,i)=>{let x=new Date(m);x.setDate(m.getDate()+i);let ds=x.toISOString().split('T')[0],ts=tasks.filter(t=>t.date===ds);return `<div class="routine-day ${ds===todayStr?'today':''}" onclick="openDay('${ds}')"><div>${n}</div><div class="muted">${x.getDate()}</div><div class="color-dots">${ts.map(t=>`<i class="dot dot-${esc(t.subject)}"></i>`).join('')}</div></div>`}).join('')}
-function renderMonth(){let now=new Date(),y=now.getFullYear(),mo=now.getMonth(),c=document.getElementById('monthGridContainer');document.getElementById('currentMonthTitle').textContent=`${y}年${mo+1}月`;let first=new Date(y,mo,1).getDay(),off=first===0?6:first-1,days=new Date(y,mo+1,0).getDate(),h='';for(let i=0;i<off;i++)h+='<div class="month-cell" style="opacity:.3"></div>';for(let d=1;d<=days;d++){let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds);h+=`<div class="month-cell" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div></div>`}c.innerHTML=h}
+function moodFace(type,small=false){
+  let cls={happy:'mood-happy',calm:'mood-calm',tired:'mood-tired',unwell:'mood-unwell',bored:'mood-bored',angry:'mood-angry',breakdown:'mood-breakdown'}[type]||'mood-calm';
+  return `<span class="mood-face ${cls}" style="${small?'width:20px;height:20px':''}"><i class="eyes"></i><i class="mouth"></i></span>`;
+}
+const MOODS=[
+  {id:'happy',name:'开心'},
+  {id:'calm',name:'平静'},
+  {id:'tired',name:'劳累'},
+  {id:'unwell',name:'不舒服'},
+  {id:'bored',name:'无聊'},
+  {id:'angry',name:'生气'},
+  {id:'breakdown',name:'崩溃'}
+];
+function renderMonth(){
+  let now=new Date(),y=now.getFullYear(),mo=now.getMonth(),c=document.getElementById('monthGridContainer');
+  document.getElementById('currentMonthTitle').textContent=`${y}年${mo+1}月`;
+  let first=new Date(y,mo,1).getDay(),off=first===0?6:first-1,days=new Date(y,mo+1,0).getDate(),h='';
+  for(let i=0;i<off;i++)h+='<div class="month-cell" style="opacity:.3"></div>';
+  for(let d=1;d<=days;d++){
+    let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds),mood=moods[ds];
+    h+=`<div class="month-cell ${mood?'has-mood':''}" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div><div class="month-mood">${mood?moodFace(mood,true):''}</div></div>`
+  }
+  c.innerHTML=h
+}
 function renderTasks(){let c=document.getElementById('taskListContainer');let todayTasks=tasks.filter(t=>t.date===todayStr);if(!todayTasks.length){c.innerHTML='<div class="muted" style="text-align:center;padding:10px">今日暂无任务，点击上方添加。</div>';return}c.innerHTML=todayTasks.map(t=>`<div class="swipe-wrap" data-swipe><div class="swipe-actions"><button class="swipe-action edit" onclick="editTask(${t.id})">修改</button><button class="swipe-action delete" onclick="deleteTask(${t.id})">删除</button></div><div class="task-item swipe-content"><div class="task-row"><div class="task-info"><span class="badge">${esc(t.subject||'通用')}</span><span>${esc(t.title)}</span></div><button class="btn btn-small ${t.completed?'btn-secondary':''}" onclick="toggleTask(${t.id})">${t.completed?'✓ 已完成':'完成'}</button></div><div class="muted" style="margin-top:5px">难度：${'★'.repeat(t.difficulty||3)}　熟悉度：${t.mastery??'—'}%</div><button class="btn btn-small" style="margin-top:8px" onclick="startRecall(${t.id})">🧠 五题回忆检测</button><div class="swipe-hint">← 左滑管理</div></div></div>`).join('');initSwipeRows()}
 function taskForm(t){return `<input id="newTaskTitle" placeholder="任务名称" value="${esc(t?.title||'')}"><select id="newTaskSubject">${subjects.map(s=>`<option ${s===(t?.subject||subjects[0])?'selected':''}>${esc(s)}</option>`).join('')}</select><div style="margin-top:8px"><label class="muted">星级：</label><select id="newTaskDifficulty">${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===(t?.difficulty||3)?'selected':''}>${'★'.repeat(n)}</option>`).join('')}</select></div><div style="margin-top:8px"><label class="muted">日期：</label><input id="newTaskDate" type="date" value="${t?.date||todayStr}"></div>`}function editTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;document.getElementById('genericTitle').textContent='✏️ 修改学习任务';document.getElementById('genericBody').innerHTML=taskForm(t)+`<button class="btn" onclick="saveEditedTask(${t.id})" style="margin-top:10px">保存修改</button>`;document.getElementById('genericModal').classList.add('active');closeAllSwipeRows()}
 function saveEditedTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;let title=document.getElementById('newTaskTitle').value.trim();if(!title)return alert('请输入任务名称');t.title=title;t.subject=document.getElementById('newTaskSubject').value;t.difficulty=+document.getElementById('newTaskDifficulty').value||3;t.date=document.getElementById('newTaskDate').value||todayStr;saveData('tasks',tasks);closeModal();renderDashboard()}
 function deleteTask(id){if(!confirm('确认删除这个学习任务吗？'))return;tasks=tasks.filter(x=>x.id!==id);saveData('tasks',tasks);renderDashboard()}
 function toggleTask(id){tasks=tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t);saveData('tasks',tasks);renderDashboard()}
-function openDay(ds){let ts=tasks.filter(t=>t.date===ds);document.getElementById('genericTitle').textContent='📅 '+ds;document.getElementById('genericBody').innerHTML=ts.length?ts.map(t=>`<div class="search-result"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.subject)} · ${t.completed?'已完成':'未完成'} · 熟悉度 ${t.mastery??'—'}%</span></div>`).join(''):'<p class="muted">当天无任务。</p>';document.getElementById('genericModal').classList.add('active')}
+function openDay(ds){
+  let ts=tasks.filter(t=>t.date===ds),current=moods[ds]||'';
+  document.getElementById('genericTitle').textContent='📅 '+ds;
+  document.getElementById('genericBody').innerHTML=
+    (ts.length?ts.map(t=>`<div class="search-result"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.subject)} · ${t.completed?'已完成':'未完成'} · 熟悉度 ${t.mastery??'—'}%</span></div>`).join(''):'<p class="muted">当天无任务。</p>')+
+    `<div style="margin-top:14px;padding-top:12px;border-top:.5px solid var(--line)">
+      <b style="font-size:13px">今日心情</b>
+      <div class="mood-picker">${MOODS.map(m=>`<button class="mood-option ${current===m.id?'selected':''}" onclick="selectMood('${ds}','${m.id}')">${moodFace(m.id)}<span>${m.name}</span></button>`).join('')}</div>
+      <div class="mood-note">${current?'已记录：'+MOODS.find(m=>m.id===current)?.name+' · 点击其他表情即可修改':'还没有记录今天的心情'}</div>
+      ${current?`<button class="btn btn-secondary btn-small" style="margin-top:9px;width:100%" onclick="clearMood('${ds}')">清除当天心情</button>`:''}
+    </div>`;
+  document.getElementById('genericModal').classList.add('active')
+}
+function selectMood(ds,id){
+  moods[ds]=id;saveData('moods',moods);renderMonth();openDay(ds)
+}
+function clearMood(ds){
+  delete moods[ds];saveData('moods',moods);renderMonth();openDay(ds)
+}
 function openTaskModal(){closeAllSwipeRows();document.getElementById('genericTitle').textContent='➕ 添加学习任务';document.getElementById('genericBody').innerHTML=taskForm()+`<button class="btn" onclick="saveNewTask()" style="margin-top:10px">保存任务</button>`;document.getElementById('genericModal').classList.add('active')}
 function saveNewTask(){let title=document.getElementById('newTaskTitle').value.trim();if(!title)return alert('请输入任务名称');tasks.unshift({id:Date.now(),title,subject:document.getElementById('newTaskSubject').value,date:document.getElementById('newTaskDate').value||todayStr,completed:false,difficulty:+document.getElementById('newTaskDifficulty').value||3,mastery:null,recall:[],repeat:false});saveData('tasks',tasks);closeModal();renderDashboard()}
 function closeModal(){document.getElementById('genericModal').classList.remove('active')}
@@ -344,10 +410,10 @@ async function loadCodeBank(){
   return codeBankPromise;
 }
 function normalizeQ(q){return{title:q.title||q.section_id||q.chapter_id||q.type||'规范考点',content:q.content||q.prompt||q.question||q.q||'',answer:q.answer||q.a||q.explanation||'',refs:q.references||q.reference||q.refs||[],page:q.page}}
-async function loadDailyCodeQuestion(){let title=document.getElementById('codeQTitle'),content=document.getElementById('codeQContent'),answer=document.getElementById('codeQAnswer');try{let a=await loadCodeBank();let pool=a.filter(x=>x.granularity==='挖空题');if(!pool.length)pool=a;let last=localStorage.getItem('zhuxi_last_code_id');let candidates=pool.filter(x=>String(x.id)!==String(last));if(!candidates.length)candidates=pool;let raw=candidates[Math.floor(Math.random()*candidates.length)];localStorage.setItem('zhuxi_last_code_id',raw.id);let q=normalizeQ(raw);currentCode=q;title.textContent=q.title;content.textContent=q.content;answer.innerHTML='<b>参考答案：</b>'+esc(q.answer)+(Array.isArray(q.refs)&&q.refs.length?'<br><br><b>规范参照：</b>'+q.refs.map(esc).join('<br>'):'')+(q.page!=null?`<br><span class="muted">PDF 第 ${esc(q.page)} 页</span>`:'');answer.style.display='none'}catch(e){title.textContent='规范题库加载失败';content.textContent=e.message}}
+async function loadDailyCodeQuestion(){let title=document.getElementById('codeQTitle'),content=document.getElementById('codeQContent'),answer=document.getElementById('codeQAnswer');try{let a=await loadCodeBank();let pool=a.filter(x=>x.granularity==='挖空题');if(!pool.length)pool=a;let last=localStorage.getItem('zhuxi_last_code_id');let candidates=pool.filter(x=>String(x.id)!==String(last));if(!candidates.length)candidates=pool;let raw=candidates[Math.floor(Math.random()*candidates.length)];localStorage.setItem('zhuxi_last_code_id',raw.id);let q=normalizeQ(raw);currentCode=q;title.textContent=q.title;content.textContent=q.content;answer.innerHTML='<b>参考答案：</b>'+esc(q.answer);answer.style.display='none'}catch(e){title.textContent='规范题库加载失败';content.textContent=e.message}}
 function toggleCodeAnswer(){let e=document.getElementById('codeQAnswer');e.style.display=e.style.display==='none'?'block':'none'}
 async function searchNorms(){let box=document.getElementById('searchResults');try{let a=await loadCodeBank(),k=(document.getElementById('searchInput').value||'').trim().toLowerCase();let res=a.filter(q=>{if(!k)return true;let fields=[q.title,q.section_id,q.chapter_id,q.type,q.content,q.prompt,q.question,q.q,q.answer,q.a,q.explanation,q.reference,q.refs,q.references];return fields.some(v=>String(v??'').toLowerCase().includes(k))});normSearchResults=res;let shown=res.slice(0,100);box.innerHTML=`<div class="muted" style="padding:4px 2px 8px">正式规范题库：${a.length} 条${k?'，匹配 '+res.length+' 条':''}</div>`+shown.map((q,i)=>{let n=normalizeQ(q);return `<div class="search-result"><b>${esc(n.title)}</b><div style="margin-top:4px">${esc(n.content)}</div><div class="actions"><button class="edit-btn" onclick="showCodeAnswer(${i})">查看答案</button></div></div>`}).join('')||'<div style="padding:10px;color:#FF3B30">未找到相关题目。</div>'}catch(e){box.innerHTML='<div style="padding:10px;color:#FF3B30">'+esc(e.message)+'</div>'}}
-function showCodeAnswer(i,arr=normSearchResults){let n=normalizeQ(arr[i]);document.getElementById('genericTitle').textContent=n.title;document.getElementById('genericBody').innerHTML='<p>'+esc(n.content)+'</p><hr style="margin:10px 0;border:0;border-top:.5px solid var(--line)"><p><b>参考答案：</b>'+esc(n.answer)+'</p>'+(n.refs?.length?'<p style="margin-top:8px"><b>规范参照：</b><br>'+n.refs.map(esc).join('<br>')+'</p>':'')+(n.page!=null?`<p class="muted" style="margin-top:8px">PDF 第 ${esc(n.page)} 页</p>`:'');document.getElementById('genericModal').classList.add('active')}
+function showCodeAnswer(i,arr=normSearchResults){let n=normalizeQ(arr[i]);document.getElementById('genericTitle').textContent=n.title;document.getElementById('genericBody').innerHTML='<p>'+esc(n.content)+'</p><hr style="margin:10px 0;border:0;border-top:.5px solid var(--line)"><p><b>参考答案：</b>'+esc(n.answer)+'</p>';document.getElementById('genericModal').classList.add('active')}
 
 function openEnglishModal(id=null){editingEnglishId=id;if(id!=null){let e=englishErrors.find(x=>String(x.id)===String(id));if(!e)return;document.getElementById('englishModalTitle').textContent='✏️ 编辑英语错误';errType.value=e.type||'其他';errReason.value=e.reason||'';errTip.value=e.tip||''}else{document.getElementById('englishModalTitle').textContent='📖 记录英语错误';errType.value='选项辨析';errReason.value='';errTip.value=''}document.getElementById('englishModal').classList.add('active')}
 function closeEnglishModal(){document.getElementById('englishModal').classList.remove('active');editingEnglishId=null}
@@ -365,11 +431,48 @@ function renderVulnerabilities(){let c=document.getElementById('vulnerabilityLis
 
 function closeAllSwipeRows(except=null){document.querySelectorAll('[data-swipe].open').forEach(w=>{if(w!==except)w.classList.remove('open')})}
 function closeSwipeRow(w){if(!w)return;w.classList.remove('open');let el=w.querySelector('.swipe-content');if(el){el.style.transition='transform .18s ease';el.style.transform='translateX(0)'}}function closeAllSwipeRows(except){document.querySelectorAll('[data-swipe].open').forEach(w=>{if(w!==except)closeSwipeRow(w)})}function initSwipeRows(){document.querySelectorAll('[data-swipe]').forEach(w=>{if(w.dataset.bound)return;w.dataset.bound='1';let el=w.querySelector('.swipe-content'),startX=0,startY=0,dx=0,moving=false;el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startX=e.touches[0].clientX;startY=e.touches[0].clientY;dx=0;moving=false;if(w.classList.contains('open'))closeAllSwipeRows(w)},{passive:true});el.addEventListener('touchmove',e=>{if(!startX)return;let x=e.touches[0].clientX,y=e.touches[0].clientY;dx=x-startX;if(Math.abs(y-startY)>Math.abs(dx)+8){startX=0;return}if(Math.abs(dx)>8){moving=true;let base=w.classList.contains('open')?-128:0;let move=Math.max(-128,Math.min(0,base+dx));el.style.transition='none';el.style.transform=`translateX(${move}px)`}},{passive:true});el.addEventListener('touchend',()=>{if(!startX)return;el.style.transition='transform .18s ease';if(moving){if(!w.classList.contains('open')&&dx<-45){closeAllSwipeRows(w);w.classList.add('open');el.style.transform='translateX(-128px)'}else if(w.classList.contains('open')&&dx>45){closeSwipeRow(w)}else if(w.classList.contains('open')){el.style.transform='translateX(-128px)'}else{el.style.transform='translateX(0)'}}startX=0;dx=0});el.addEventListener('click',e=>{if(e.target.closest('button'))return;if(w.classList.contains('open'))closeSwipeRow(w)})})}document.addEventListener('touchstart',e=>{if(!e.target.closest('[data-swipe]'))closeAllSwipeRows()},{passive:true});
-function renderWeeklySummary(){let d=new Date(),dow=d.getDay()||7,start=new Date(d);start.setDate(d.getDate()-dow+1);start.setHours(0,0,0,0);let end=new Date(start);end.setDate(start.getDate()+7);let week=tasks.filter(t=>{let x=new Date(t.date+'T23:59:59');return x>=start&&x<end});let done=week.filter(t=>t.completed).length,rate=week.length?Math.round(done/week.length*100):0,withM=week.filter(t=>typeof t.mastery==='number'),avg=withM.length?Math.round(withM.reduce((a,t)=>a+t.mastery,0)/withM.length):null,low=withM.filter(t=>t.mastery<60),high=withM.filter(t=>t.mastery>=80);let sub={};week.forEach(t=>sub[t.subject||'其他']=(sub[t.subject||'其他']||0)+1);let topSub=Object.entries(sub).sort((a,b)=>b[1]-a[1])[0]?.[0]||'暂无';let advice=[];if(!week.length)advice.push('本周还没有任务数据。先建立少量明确任务，再用五题回忆检测掌握程度。');else{if(rate<70)advice.push(`本周任务完成率为 ${rate}%，优先减少同时推进的任务数量，保证每日核心任务真正完成。`);else if(rate>=90)advice.push(`本周任务完成率为 ${rate}%，执行稳定，可以保持当前任务量。`);if(avg!==null&&avg<60)advice.push(`平均熟悉度仅 ${avg}%，学习量不是当前首要问题，下周应增加“合书回忆”和间隔复述，少做单纯重复阅读。`);else if(avg!==null&&avg>=80)advice.push(`平均熟悉度 ${avg}%，已有较稳定提取能力，可以把更多时间用于新内容或综合题。`);if(low.length)advice.push(`有 ${low.length} 个任务熟悉度低于 60%，建议下周优先复习这些任务，而不是平均分配时间。`);if(high.length&&high.length===withM.length)advice.push('已有掌握度数据的任务整体较稳定，可逐渐拉长重复间隔。');advice.push(`本周任务最多的科目是“${topSub}”，下周可继续观察它的任务量与熟悉度是否匹配。`)}document.getElementById('weeklySummaryContent').innerHTML=`<div><b>本周概况</b>：${week.length} 项任务，完成 ${done} 项，完成率 <b>${rate}%</b>；${avg===null?'暂未形成有效熟悉度数据':`平均熟悉度 <b>${avg}%</b>`}。</div><div style="margin-top:10px"><b>系统分析</b></div><ul style="padding-left:20px;margin:6px 0">${advice.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div style="margin-top:10px;background:#f2edf6;padding:10px;border-radius:8px"><b>下周建议</b><br>${esc(advice[0]||'继续保持，并使用五题回忆检测记录真实掌握度。')}</div>`}
-function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
+function makeTrendChart(values,labels,title){
+  if(!values.length)return '<div class="chart-empty">暂无足够数据，完成一些学习任务后这里会自动生成趋势图。</div>';
+  let w=340,h=150,p=22,max=Math.max(1,...values),step=values.length===1?0:(w-p*2)/(values.length-1);
+  let pts=values.map((v,i)=>`${(p+i*step).toFixed(1)},${(h-p-(v/max)*(h-p*2)).toFixed(1)}`).join(' ');
+  let circles=values.map((v,i)=>{let x=p+i*step,y=h-p-(v/max)*(h-p*2);return `<circle cx="${x}" cy="${y}" r="3" fill="#e58db2"><title>${esc(labels[i])}：${v} 项</title></circle>`}).join('');
+  let grid=[0,.5,1].map(q=>{let y=h-p-q*(h-p*2);return `<line x1="${p}" x2="${w-p}" y1="${y}" y2="${y}" stroke="#eadfe5" stroke-width="1"/>`}).join('');
+  return `<div class="chart-panel"><div style="font-size:12px;font-weight:600;margin-bottom:4px">${title}</div><svg class="trend-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${grid}<polyline points="${pts}" fill="none" stroke="#e58db2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${circles}</svg><div class="trend-labels" style="grid-template-columns:repeat(${labels.length},1fr)">${labels.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`
+}
+function renderWeeklySummary(){
+  let d=new Date(),dow=d.getDay()||7,start=new Date(d);start.setDate(d.getDate()-dow+1);start.setHours(0,0,0,0);
+  let end=new Date(start);end.setDate(start.getDate()+7);
+  let week=tasks.filter(t=>{let x=new Date(t.date+'T23:59:59');return x>=start&&x<end});
+  let done=week.filter(t=>t.completed).length,rate=week.length?Math.round(done/week.length*100):0,withM=week.filter(t=>typeof t.mastery==='number'),avg=withM.length?Math.round(withM.reduce((a,t)=>a+t.mastery,0)/withM.length):null,low=withM.filter(t=>t.mastery<60),high=withM.filter(t=>t.mastery>=80);
+  let sub={};week.forEach(t=>sub[t.subject||'其他']=(sub[t.subject||'其他']||0)+1);
+  let topSub=Object.entries(sub).sort((a,b)=>b[1]-a[1])[0]?.[0]||'暂无',advice=[];
+  if(!week.length)advice.push('本周还没有任务数据。先建立少量明确任务，再用五题回忆检测掌握程度。');
+  else{
+    if(rate<70)advice.push(`本周任务完成率为 ${rate}%，优先减少同时推进的任务数量，保证每日核心任务真正完成。`);
+    else if(rate>=90)advice.push(`本周任务完成率为 ${rate}%，执行稳定，可以保持当前任务量。`);
+    if(avg!==null&&avg<60)advice.push(`平均熟悉度仅 ${avg}%，下周应增加“合书回忆”和间隔复述，少做单纯重复阅读。`);
+    else if(avg!==null&&avg>=80)advice.push(`平均熟悉度 ${avg}%，已有较稳定提取能力，可以把更多时间用于新内容或综合题。`);
+    if(low.length)advice.push(`有 ${low.length} 个任务熟悉度低于 60%，建议下周优先复习这些任务。`);
+    if(high.length&&high.length===withM.length)advice.push('已有掌握度数据的任务整体较稳定，可逐渐拉长重复间隔。');
+    advice.push(`本周任务最多的科目是“${topSub}”，下周可继续观察它的任务量与熟悉度是否匹配。`)
+  }
+  let labels=[],vals=[];
+  for(let i=0;i<7;i++){let x=new Date(start);x.setDate(start.getDate()+i);let ds=x.toISOString().split('T')[0];labels.push('周'+'一二三四五六日'[i]);vals.push(week.filter(t=>t.date===ds).length)}
+  document.getElementById('weeklySummaryContent').innerHTML=`<div><b>本周概况</b>：${week.length} 项任务，完成 ${done} 项，完成率 <b>${rate}%</b>；${avg===null?'暂未形成有效熟悉度数据':`平均熟悉度 <b>${avg}%</b>`}。</div><div style="margin-top:10px"><b>系统分析</b></div><ul style="padding-left:20px;margin:6px 0">${advice.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div style="margin-top:10px;background:#f2edf6;padding:10px;border-radius:8px"><b>下周建议</b><br>${esc(advice[0]||'继续保持，并使用五题回忆检测记录真实掌握度。')}</div>`;
+  document.getElementById('weeklyChart').innerHTML=makeTrendChart(vals,labels,'本周每日任务趋势')
+}
+function renderMonthlySummary(){
+  let now=new Date(),y=now.getFullYear(),mo=now.getMonth(),days=new Date(y,mo+1,0).getDate(),start=`${y}-${String(mo+1).padStart(2,'0')}-01`,end=`${y}-${String(mo+1).padStart(2,'0')}-${String(days).padStart(2,'0')}`;
+  let month=tasks.filter(t=>t.date>=start&&t.date<=end),done=month.filter(t=>t.completed).length,rate=month.length?Math.round(done/month.length*100):0,avg=month.length?Math.round(month.reduce((a,t)=>a+Number(t.mastery||0),0)/month.length):0;
+  let labels=[],vals=[],weeks=Math.ceil(days/7);
+  for(let w=0;w<weeks;w++){let a=w*7+1,b=Math.min(days,(w+1)*7);labels.push(`第${w+1}周`);vals.push(month.filter(t=>{let n=Number(t.date.slice(8,10));return n>=a&&n<=b}).length)}
+  document.getElementById('monthlySummaryContent').innerHTML=`<div><b>${y}年${mo+1}月</b>：共 ${month.length} 项任务，完成 ${done} 项，完成率 <b>${rate}%</b>，平均掌握度 <b>${avg}%</b>。</div><div style="margin-top:8px;color:var(--sub);font-size:11px">按周观察学习量变化，帮助判断月底是否出现任务堆积或学习强度波动。</div>`;
+  document.getElementById('monthlyChart').innerHTML=makeTrendChart(vals,labels,'本月每周任务趋势')
+}
+function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities,moods},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
 function clearAllData(){if(confirm('确定清空所有累计数据吗？')){localStorage.clear();location.reload()}}
 
-renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();loadDailyCodeQuestion();
+renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 initAuth().catch(e=>console.warn('Auth init failed',e));
 </script>
