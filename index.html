@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>筑习 - 建筑考研学习系统 v1.6.2</title>
+<title>筑习 - 建筑考研学习系统 v1.7.3</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#f6f6f3">
 <meta name="mobile-web-app-capable" content="yes">
@@ -62,7 +62,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 </style>
 </head>
 <body>
-<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.7.2</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" style="display:none" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
+<header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">v1.7.3</span></span><span style="display:flex;gap:6px;align-items:center"><button id="installBtn" class="btn btn-small btn-secondary" onclick="installApp()">安装到桌面</button><button class="btn btn-small btn-secondary" onclick="exportDataJSON()">导出数据</button></span></h1></header>
 
 <div class="container">
 <section id="tab-dashboard" class="tab-content active">
@@ -233,29 +233,44 @@ renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();ren
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 
+<div id="installHelpModal" class="modal" onclick="if(event.target===this)closeInstallHelp()">
+  <div class="modal-content">
+    <h2 style="font-size:18px;margin-bottom:12px">📱 安装筑习</h2>
+    <div id="installHelpText" style="font-size:13px;line-height:1.75"></div>
+    <button class="btn" style="margin-top:14px" onclick="closeInstallHelp()">知道了</button>
+  </div>
+</div>
+
 <script>
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
   deferredInstallPrompt=e;
-  const b=document.getElementById('installBtn');
-  if(b)b.style.display='inline-flex';
 });
-async function installApp(){
-  if(!deferredInstallPrompt){
-    alert('如果没有出现安装窗口：Android/Chrome 请打开浏览器菜单选择“安装应用”或“添加到主屏幕”；iPhone/iPad 请在 Safari 的分享菜单中选择“添加到主屏幕”。');
+function closeInstallHelp(){document.getElementById('installHelpModal').classList.remove('active')}
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function installApp(){
+  if(isStandalone()){alert('筑习已经安装到设备上了。');return;}
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null}).catch(()=>{});
     return;
   }
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt=null;
-  const b=document.getElementById('installBtn');
-  if(b)b.style.display='none';
+  const ua=navigator.userAgent||'';
+  const isIOS=/iPhone|iPad|iPod/i.test(ua);
+  const isAndroid=/Android/i.test(ua);
+  let html='';
+  if(isIOS){
+    html='<b>iPhone / iPad（Safari）</b><br>点击浏览器底部/顶部的“分享”按钮 → 选择“添加到主屏幕” → 添加。';
+  }else if(isAndroid){
+    html='<b>安卓浏览器</b><br>如果当前浏览器支持 PWA：打开浏览器菜单（⋮）→“安装应用”或“添加到主屏幕”。<br><br>如果菜单里没有这两个选项，说明该浏览器不提供 PWA 安装功能。可以改用 Chrome、Edge 等支持 PWA 的浏览器安装；筑习本身仍可正常网页使用。';
+  }else{
+    html='<b>电脑浏览器</b><br>请查看地址栏右侧是否有“安装”图标；也可以打开浏览器菜单寻找“安装筑习 / 安装应用”。';
+  }
+  document.getElementById('installHelpText').innerHTML=html;
+  document.getElementById('installHelpModal').classList.add('active');
 }
-window.addEventListener('appinstalled',()=>{
-  const b=document.getElementById('installBtn');
-  if(b)b.style.display='none';
-});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null});
 </script>
 
 </body>
