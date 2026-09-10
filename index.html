@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>筑习 - 建筑考研学习系统 v1.8</title>
+<title>筑习 - 建筑考研学习系统 2.1</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#f6f6f3">
 <meta name="mobile-web-app-capable" content="yes">
@@ -80,6 +80,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .trend-svg{width:100%;height:150px;display:block}
 .trend-labels{display:grid;gap:2px;margin-top:2px;font-size:9px;color:var(--sub);text-align:center}
 .chart-empty{padding:22px 10px;text-align:center;color:var(--sub);font-size:12px}
+.fam-row{padding:11px 0;border-bottom:.5px solid var(--line);cursor:pointer}.fam-row:last-child{border-bottom:0}.fam-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.fam-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fam-meta{font-size:10px;color:var(--sub);margin-top:4px}.fam-bar{height:7px;background:#eee;border-radius:99px;overflow:hidden;margin-top:7px}.fam-fill{height:100%;background:#000;border-radius:99px}.fam-filter{display:grid;grid-template-columns:1fr 1fr;gap:6px}.random-card{background:#faf7fc;border:1px solid #eadff0;border-radius:10px;padding:12px;margin-top:10px}.random-item{padding:10px 0;border-bottom:.5px solid var(--line)}.random-item:last-child{border-bottom:0}
 
 @media(max-width:480px){.study-stat-grid{grid-template-columns:repeat(3,1fr)}.study-stat{padding:8px 4px}.study-stat .num{font-size:18px}}
 
@@ -141,9 +142,9 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 
 <section id="tab-english" class="tab-content"><div class="card"><h2>📖 每日英语错误复盘 <button class="btn btn-small" onclick="openEnglishModal()">+ 记一条错误</button></h2><p class="muted" style="margin-bottom:8px">本地永久保存错误记录与复盘心得。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="englishErrorListContainer"></div><button class="btn btn-secondary" style="margin-top:12px" onclick="openEnglishMonthlySummaryModal()">📊 查看英语月度错误总结</button></div></section>
 
-<section id="tab-vulnerability" class="tab-content"><div class="card"><h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openVulnerabilityModal()">+ 记个小漏洞</button></h2><p class="muted" style="margin-bottom:8px">记录知道但无法完整复述的知识点。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="vulnerabilityListContainer"></div></div></section>
+<section id="tab-vulnerability" class="tab-content"><div class="card"><h2>🎲 Random <span class="muted">到期回忆</span></h2><p class="muted">低熟悉度知识点会在间隔后自动进入这里，优先处理低分和久未复习内容。</p><div id="randomList"></div></div><div class="card"><h2>🧠 专业课细节点漏洞本 <button class="btn btn-small" onclick="openVulnerabilityModal()">+ 记个小漏洞</button></h2><p class="muted" style="margin-bottom:8px">记录知道但无法完整复述的知识点。<span style="display:block;margin-top:3px">手机端左滑记录即可显示“修改 / 删除”。</span></p><div id="vulnerabilityListContainer"></div></div></section>
 
-<section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="weeklyChart"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div><div class="card"><h2>📅 月度学习总结</h2><div id="monthlySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="monthlyChart"></div><button class="btn btn-secondary" onclick="renderMonthlySummary()">🔄 刷新月报数据</button></div>
+<section id="tab-familiarity" class="tab-content"><div class="card"><h2>📈 熟悉度追踪 <span class="muted">长期变化</span></h2><p class="muted" style="margin-bottom:10px">这里只统计已经完成过五题回忆的知识点。每次回忆都会留下历史记录。</p><div class="fam-filter"><input id="famSearch" placeholder="搜索知识点" oninput="renderFamiliarity()"><select id="famSort" onchange="renderFamiliarity()"><option value="low">当前熟悉度最低</option><option value="recent">最近测试</option><option value="old">最久未测试</option><option value="count">测试次数最多</option></select></div><div id="familiarityList" style="margin-top:10px"></div></div><div class="card"><h2>📌 熟悉度说明</h2><p class="muted" style="line-height:1.7">五题平均分会转换为百分制。历史记录不会被新一次回忆覆盖，因此可以观察“记住 → 遗忘 → 再记住”的变化。</p></div></section><section id="tab-settings" class="tab-content"><div class="card"><h2>📊 每周自动学习总结</h2><div id="weeklySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="weeklyChart"></div><button class="btn btn-secondary" onclick="renderWeeklySummary()">🔄 刷新周报数据</button></div><div class="card"><h2>📅 月度学习总结</h2><div id="monthlySummaryContent" style="background:#F9F9FB;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;border:.5px solid var(--line);margin-bottom:12px"></div><div id="monthlyChart"></div><button class="btn btn-secondary" onclick="renderMonthlySummary()">🔄 刷新月报数据</button></div>
 <div class="card"><h2>⚙️ 系统设置</h2><p class="muted" style="margin-bottom:10px">默认本地保存；登录后会自动同步到云端，可在多个设备使用同一账号。</p><button class="btn btn-secondary" onclick="alert('⏰ 20:00 晚间提醒测试成功！')" style="margin-bottom:10px">🔔 测试 20:00 晚间提醒</button><button class="btn btn-secondary" onclick="clearAllData()" style="color:#FF3B30">🗑️ 清空所有数据</button></div></section>
 </div>
 
@@ -168,7 +169,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 <button class="btn btn-secondary" style="margin-top:8px" onclick="closeAuthModal()">关闭</button>
 </div></div>
 
-<nav class="tab-bar"><div class="tab-item active" onclick="switchTab('dashboard',this)"><span>📅</span>看板</div><div class="tab-item" onclick="switchTab('tree',this)"><span>🌳</span>知识树</div><div class="tab-item" onclick="switchTab('norms',this)"><span>🏛️</span>规范</div><div class="tab-item" onclick="switchTab('english',this)"><span>📖</span>英语</div><div class="tab-item" onclick="switchTab('vulnerability',this)"><span>🧠</span>专业漏洞</div><div class="tab-item" onclick="switchTab('settings',this)"><span>📊</span>周报/设置</div></nav>
+<nav class="tab-bar"><div class="tab-item active" onclick="switchTab('dashboard',this)"><span>📅</span>看板</div><div class="tab-item" onclick="switchTab('tree',this)"><span>🌳</span>知识树</div><div class="tab-item" onclick="switchTab('norms',this)"><span>🏛️</span>规范</div><div class="tab-item" onclick="switchTab('english',this)"><span>📖</span>英语</div><div class="tab-item" onclick="switchTab('vulnerability',this)"><span>🧠</span>专业漏洞</div><div class="tab-item" onclick="switchTab('familiarity',this)"><span>📈</span>熟悉度</div><div class="tab-item" onclick="switchTab('settings',this)"><span>📊</span>周报/设置</div></nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -185,6 +186,7 @@ let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",child
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
 let moods=getData('moods',{});
+let familiarityHistory=getData('familiarity_history',[]);
 let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
 let currentUser=null,authMode='login',syncTimer=null;
 
@@ -226,7 +228,7 @@ async function submitAuth(){
 async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
 async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
 function updateAuthUI(){const text=currentUser?'☁ 已登录':'☁ 登录 / 注册';const b=document.getElementById('sideAuthBtn');if(b)b.textContent=text;const hint=document.getElementById('sideAuthHint');if(hint)hint.textContent=currentUser?('已登录：'+(currentUser.email||'当前账号')+' · 学习记录自动同步'):'登录后可在多个设备同步学习记录';}
-function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,version:2,updated_at:new Date().toISOString()}}
+function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,familiarityHistory,version:2,updated_at:new Date().toISOString()}}
 function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
 async function syncFromCloud(){
   if(!currentUser)return;
@@ -243,9 +245,10 @@ async function syncFromCloud(){
     englishErrors=mergeArray(local.englishErrors,cloud.englishErrors,'id');
     vulnerabilities=mergeArray(local.vulnerabilities,cloud.vulnerabilities,'id');
     moods={...(local.moods||{}),...(cloud.moods||{})};
+    familiarityHistory=mergeArray(local.familiarityHistory,cloud.familiarityHistory,'id');
     if(cloud.subjectTree&&JSON.stringify(cloud.subjectTree)!==JSON.stringify(local.subjectTree)) subjectTree=cloud.subjectTree;
-    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);
-    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();renderMonthlySummary();
+    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);saveData('familiarity_history',familiarityHistory);
+    renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();
     await syncToCloud(true);
   }
 }
@@ -311,7 +314,7 @@ async function initAuth(){
     }
   });
 }
-function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings'){renderWeeklySummary();renderMonthlySummary()}}
+function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability'){renderVulnerabilities();renderRandom()}if(id==='familiarity')renderFamiliarity();if(id==='settings'){renderWeeklySummary();renderMonthlySummary()}}
 function renderDashboard(){renderRoutine();renderMonth();renderTasks();renderStudyStats()}
 function renderStudyStats(){
   const el=document.getElementById('studyStats'); if(!el)return;
@@ -385,10 +388,10 @@ function openDay(ds){
   document.getElementById('genericModal').classList.add('active')
 }
 function selectMood(ds,id){
-  moods[ds]=id;saveData('moods',moods);renderMonth();openDay(ds)
+  moods[ds]=id;saveData('moods',moods);saveData('familiarity_history',familiarityHistory);renderMonth();openDay(ds)
 }
 function clearMood(ds){
-  delete moods[ds];saveData('moods',moods);renderMonth();openDay(ds)
+  delete moods[ds];saveData('moods',moods);saveData('familiarity_history',familiarityHistory);renderMonth();openDay(ds)
 }
 function openTaskModal(){closeAllSwipeRows();document.getElementById('genericTitle').textContent='➕ 添加学习任务';document.getElementById('genericBody').innerHTML=taskForm()+`<button class="btn" onclick="saveNewTask()" style="margin-top:10px">保存任务</button>`;document.getElementById('genericModal').classList.add('active')}
 function saveNewTask(){let title=document.getElementById('newTaskTitle').value.trim();if(!title)return alert('请输入任务名称');tasks.unshift({id:Date.now(),title,subject:document.getElementById('newTaskSubject').value,date:document.getElementById('newTaskDate').value||todayStr,completed:false,difficulty:+document.getElementById('newTaskDifficulty').value||3,mastery:null,recall:[],repeat:false});saveData('tasks',tasks);closeModal();renderDashboard()}
@@ -401,7 +404,7 @@ const recallQuestions=[
 '你是否能够把这个知识点的各个部分组织起来，形成有逻辑的完整复述？',
 '你是否能够在考场上独立、快速地把这个知识点完整输出，并应对相关追问？'
 ];
-let recallState={taskId:null,index:0,scores:[]};
+let recallState={taskId:null,index:0,scores:[],source:'五题回忆'};
 
 function toggleSideMenu(){document.getElementById('sideMenuOverlay').classList.toggle('active')}
 function closeSideMenu(){document.getElementById('sideMenuOverlay').classList.remove('active')}
@@ -412,14 +415,20 @@ document.addEventListener('keydown',function(e){
     closeSideMenu();
   }
 });
-function closeRecall(){document.getElementById('recallModal').classList.remove('active');recallState={taskId:null,index:0,scores:[]};}
-function startRecall(id){let t=tasks.find(x=>x.id===id);if(!t)return;recallState={taskId:id,index:0,scores:Array.isArray(t.recall)?[...t.recall]:[]};if(recallState.scores.length!==5)recallState.scores=[null,null,null,null,null];document.getElementById('recallModal').classList.add('active');renderRecallQuestion()}
+function closeRecall(){document.getElementById('recallModal').classList.remove('active');recallState={taskId:null,index:0,scores:[],source:'五题回忆'};}
+function startRandomRecall(id){let t=tasks.find(x=>x.id===id);if(!t)return;recallState={taskId:id,index:0,scores:[null,null,null,null,null],source:'Random'};document.getElementById('recallModal').classList.add('active');renderRecallQuestion()}
+function startRecall(id){let t=tasks.find(x=>x.id===id);if(!t)return;recallState={taskId:id,index:0,scores:Array.isArray(t.recall)?[...t.recall]:[],source:'五题回忆'};if(recallState.scores.length!==5)recallState.scores=[null,null,null,null,null];document.getElementById('recallModal').classList.add('active');renderRecallQuestion()}
 function renderRecallQuestion(){let i=recallState.index,score=recallState.scores[i],labels=['完全不会','较差','一般','较好','非常熟练'];document.getElementById('recallProgress').textContent=`第 ${i+1} / 5 题 · 请先合上书，再判断自己的真实掌握程度`;document.getElementById('recallBody').innerHTML=`<div class="recall-question"><b>${i+1}️⃣ ${recallQuestions[i]}</b><div class="recall-options">${labels.map((x,n)=>`<button class="recall-opt ${score===n+1?'selected':''}" onclick="setRecallScore(${n+1})">${n+1}<br>${x}</button>`).join('')}</div></div><div class="recall-nav"><button class="btn btn-secondary" onclick="prevRecall()" ${i===0?'disabled':''}>上一题</button>${i<4?'<button class="btn" onclick="nextRecall()">下一题</button>':'<button class="btn" onclick="finishRecall()">生成熟悉度</button>'}</div>`}
 function setRecallScore(n){recallState.scores[recallState.index]=n;renderRecallQuestion()}
 function nextRecall(){if(!recallState.scores[recallState.index])return alert('请选择本题掌握程度');recallState.index++;renderRecallQuestion()}
 function prevRecall(){if(recallState.index>0){recallState.index--;renderRecallQuestion()}}
-function finishRecall(){if(recallState.scores.some(x=>!x))return alert('请完成5道回忆题后再生成熟悉度');let t=tasks.find(x=>x.id===recallState.taskId);if(!t)return;let avg=Math.round(recallState.scores.reduce((a,b)=>a+b,0)/5/5*100);t.recall=[...recallState.scores];t.mastery=avg;t.lastRecall=new Date().toISOString();saveData('tasks',tasks);document.getElementById('recallModal').classList.remove('active');renderDashboard();alert(`本次五题回忆完成！
-综合熟悉度：${avg}%`)}
+function finishRecall(){if(recallState.scores.some(x=>!x))return alert('请完成5道回忆题后再生成熟悉度');let t=tasks.find(x=>x.id===recallState.taskId);if(!t)return;let avg=Math.round(recallState.scores.reduce((a,b)=>a+b,0)/5/5*100);let now=new Date(),delay=avg<40?2:avg<60?3:avg<80?3:avg<100?7:14;let next=new Date(now);next.setDate(next.getDate()+delay);t.recall=[...recallState.scores];t.mastery=avg;t.lastRecall=now.toISOString();familiarityHistory.push({id:Date.now(),taskId:t.id,title:t.title,subject:t.subject||'通用',date:now.toISOString(),mastery:avg,scores:[...recallState.scores],source:recallState.source||'五题回忆',nextReviewAt:next.toISOString()});saveData('tasks',tasks);saveData('familiarity_history',familiarityHistory);document.getElementById('recallModal').classList.remove('active');renderDashboard();renderFamiliarity();renderRandom();alert(`本次五题回忆完成！\n综合熟悉度：${avg}%\n建议下次回忆：${delay}天后`)}
+function famRecordsByTask(){let map=new Map();(familiarityHistory||[]).forEach(r=>{let k=String(r.taskId);if(!map.has(k))map.set(k,[]);map.get(k).push(r)});map.forEach(a=>a.sort((x,y)=>new Date(x.date)-new Date(y.date)));return map}
+function renderFamiliarity(){let el=document.getElementById('familiarityList');if(!el)return;let map=famRecordsByTask(),q=(document.getElementById('famSearch')?.value||'').trim().toLowerCase(),sort=document.getElementById('famSort')?.value||'low',rows=[];map.forEach((rs,k)=>{let t=tasks.find(x=>String(x.id)===k),last=rs[rs.length-1];if(!last)return;let title=t?.title||last.title;if(q&&!title.toLowerCase().includes(q))return;rows.push({t,last,rs,title})});rows.sort((a,b)=>sort==='low'?a.last.mastery-b.last.mastery:sort==='recent'?new Date(b.last.date)-new Date(a.last.date):sort==='old'?new Date(a.last.date)-new Date(b.last.date):b.rs.length-a.rs.length);el.innerHTML=rows.length?rows.map(x=>`<div class="fam-row" onclick="openFamiliarity(${x.t?x.t.id:x.last.taskId})"><div class="fam-head"><span class="fam-title">${esc(x.title)}</span><b>${x.last.mastery}%</b></div><div class="fam-bar"><div class="fam-fill" style="width:${x.last.mastery}%"></div></div><div class="fam-meta">${esc(x.t?.subject||x.last.subject||'通用')} · ${x.rs.length} 次回忆 · 最近 ${new Date(x.last.date).toLocaleDateString()}</div></div>`).join(''):'<div class="chart-empty">还没有熟悉度历史。完成一次五题回忆后，这里会自动出现。</div>'}
+function makeMiniTrend(rs){let w=330,h=120,p=20,vals=rs.map(r=>r.mastery),max=Math.max(100,...vals),min=0;let pts=vals.map((v,i)=>`${p+i*(w-2*p)/Math.max(1,vals.length-1)},${h-p-(v-min)/(max-min)*(h-2*p)}`).join(' ');return `<svg class="trend-svg" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="#000" stroke-width="2" points="${pts}"/>${rs.map((r,i)=>{let xy=pts.split(' ')[i].split(',');return `<circle cx="${xy[0]}" cy="${xy[1]}" r="3" fill="#000"/>`}).join('')}</svg>`}
+function openFamiliarity(id){let rs=(familiarityHistory||[]).filter(r=>String(r.taskId)===String(id)).sort((a,b)=>new Date(a.date)-new Date(b.date)),t=tasks.find(x=>String(x.id)===String(id)),title=t?.title||rs[0]?.title||'知识点';if(!rs.length)return;document.getElementById('genericTitle').textContent='📈 '+title;document.getElementById('genericBody').innerHTML=`<div class="chart-panel">${makeMiniTrend(rs)}</div><div style="margin-top:12px">${rs.slice().reverse().map(r=>`<div class="search-result"><b>${r.mastery}%</b> · ${esc(r.source||'回忆')}<br><span class="muted">${new Date(r.date).toLocaleString()} · ${r.scores?.join(' / ')||'—'}</span></div>`).join('')}</div><button class="btn btn-secondary" style="margin-top:12px" onclick="deleteFamiliarity(${id})">删除该知识点全部历史</button>`;document.getElementById('genericModal').classList.add('active')}
+function deleteFamiliarity(id){if(!confirm('确定删除这个知识点的全部熟悉度历史吗？此操作不会删除学习任务。'))return;familiarityHistory=familiarityHistory.filter(r=>String(r.taskId)!==String(id));let t=tasks.find(x=>String(x.id)===String(id));if(t){t.mastery=null;t.recall=[];t.lastRecall=null;saveData('tasks',tasks)}saveData('familiarity_history',familiarityHistory);closeModal();renderFamiliarity();renderRandom()}
+function renderRandom(){let el=document.getElementById('randomList');if(!el)return;let now=Date.now(),map=famRecordsByTask(),items=[];map.forEach((rs,k)=>{let last=rs[rs.length-1],t=tasks.find(x=>String(x.id)===k);if(!t)return;let due=last.nextReviewAt?new Date(last.nextReviewAt).getTime()<=now:last.mastery<80&&new Date(last.date).getTime()+3*86400000<=now;if(due)items.push({t,last,rs})});items.sort((a,b)=>a.last.mastery-b.last.mastery||new Date(a.last.date)-new Date(b.last.date));el.innerHTML=items.length?items.slice(0,10).map(x=>`<div class="random-item"><div class="fam-head"><span class="fam-title">${esc(x.t.title)}</span><b>${x.last.mastery}%</b></div><div class="fam-meta">${esc(x.t.subject||'通用')} · 已回忆 ${x.rs.length} 次 · 到期</div><button class="btn btn-small" style="margin-top:7px" onclick="startRandomRecall(${x.t.id})">开始五题回忆</button></div>`).join(''):'<div class="chart-empty">目前没有到期知识点。继续完成五题回忆，系统会自动安排。</div>'}
 function renderTree(){document.getElementById('treeRootContainer').innerHTML='<ul class="tree-list" style="padding-left:0">'+treeHTML(subjectTree)+'</ul>'}
 function treeHTML(n){return `<li class="tree-node"><div class="tree-node-content"><input value="${esc(n.name)}" onchange="renameNode(${n.id},this.value)"><div class="tree-actions"><button style="background:#34C759;color:white" onclick="addNode(${n.id})">+子节点</button>${n.id!==1?`<button style="background:#FF3B30;color:white" onclick="deleteNode(${n.id})">删</button>`:''}</div></div>${n.children?.length?'<ul class="tree-list">'+n.children.map(treeHTML).join('')+'</ul>':''}</li>`}
 function findNode(n,id){if(n.id===id)return n;for(const c of n.children||[]){let r=findNode(c,id);if(r)return r}return null}
@@ -512,7 +521,7 @@ function renderMonthlySummary(){
 function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities,moods},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
 function clearAllData(){if(confirm('确定清空所有累计数据吗？')){localStorage.clear();location.reload()}}
 
-renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
+renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 initAuth().catch(e=>console.warn('Auth init failed',e));
 </script>
