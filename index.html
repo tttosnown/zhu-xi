@@ -160,7 +160,7 @@ async function submitAuth(){
   if(pw.length<8)return alert('密码至少需要 8 位。');
   if(authMode==='signup'){
     const pw2=document.getElementById('authPassword2').value;if(pw!==pw2)return alert('两次密码不一致。');
-    const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:'https://tttosnown.github.io/zhu-xi/'}});
+    const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
     if(error)return alert('注册失败：'+error.message);
     if(data.session){currentUser=data.user;await afterLogin(true);alert('注册成功，已登录。');closeAuthModal()}
     else alert('注册成功！请到邮箱点击验证链接，然后返回筑习登录。');
@@ -170,7 +170,7 @@ async function submitAuth(){
     currentUser=data.user;await afterLogin(false);closeAuthModal();
   }
 }
-async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://tttosnown.github.io/zhu-xi/'+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
+async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
 async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
 function updateAuthUI(){const b=document.getElementById('authBtn');if(!b)return;b.textContent=currentUser?'☁ 已登录':'登录 / 注册';b.title=currentUser?(currentUser.email||'已登录'):'登录筑习'}
 function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,version:1,updated_at:new Date().toISOString()}}
@@ -205,8 +205,57 @@ async function syncToCloud(force=false){
 function scheduleSync(){if(!currentUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToCloud(false),700)}
 async function afterLogin(isNew){currentUser= currentUser || (await sb.auth.getUser()).data.user;updateAuthUI();if(!isNew)await syncFromCloud();else await syncToCloud(true);}
 async function initAuth(){
-  const {data}=await sb.auth.getSession();if(data.session){currentUser=data.session.user;updateAuthUI();await syncFromCloud()}
-  sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;updateAuthUI()});
+  // Supabase email confirmation/password-reset links can return either a ?code=...
+  // callback or an access-token hash. The Supabase client handles the session
+  // exchange automatically; we then refresh the UI and sync the account.
+  try{
+    const url=new URL(window.location.href);
+    const hasAuthParams=
+      url.searchParams.has('code') ||
+      url.searchParams.has('error') ||
+      url.hash.includes('access_token=') ||
+      url.hash.includes('refresh_token=');
+
+    if(hasAuthParams){
+      // Give Supabase a moment to finish its URL callback/session exchange.
+      await new Promise(r=>setTimeout(r,150));
+      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+      if(sessionError)console.warn('Auth callback:',sessionError);
+      if(sessionData?.session){
+        currentUser=sessionData.session.user;
+        updateAuthUI();
+        // Remove callback parameters so refreshing the page does not repeat them.
+        const cleanUrl=new URL(window.location.href);
+        cleanUrl.searchParams.delete('code');
+        cleanUrl.searchParams.delete('error');
+        cleanUrl.searchParams.delete('error_code');
+        cleanUrl.searchParams.delete('error_description');
+        cleanUrl.searchParams.delete('type');
+        cleanUrl.hash='';
+        window.history.replaceState({},document.title,cleanUrl.pathname+cleanUrl.search);
+        await syncFromCloud();
+        alert('邮箱验证成功，筑习账号已确认。');
+      }else if(url.searchParams.has('error')){
+        alert('邮箱验证失败：'+(url.searchParams.get('error_description')||url.searchParams.get('error')||'未知错误'));
+      }
+    }
+
+    const {data}=await sb.auth.getSession();
+    if(data.session){
+      currentUser=data.session.user;
+      updateAuthUI();
+      await syncFromCloud();
+    }
+  }catch(e){console.warn('Auth init failed',e)}
+
+  sb.auth.onAuthStateChange(async (_event,session)=>{
+    currentUser=session?.user||null;
+    updateAuthUI();
+    if(session && _event==='SIGNED_IN'){
+      // The SIGNED_IN event is also emitted after email confirmation.
+      await syncFromCloud();
+    }
+  });
 }
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability')renderVulnerabilities();if(id==='settings')renderWeeklySummary()}
 function renderDashboard(){renderRoutine();renderMonth();renderTasks();renderStudyStats()}
