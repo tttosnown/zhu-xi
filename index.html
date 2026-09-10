@@ -96,6 +96,10 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .side-menu-note{font-size:12px;color:var(--sub);line-height:1.6;margin:8px 12px 18px}
 
 .recall-lock{touch-action:none}.recall-lock .modal-content{touch-action:auto}
+
+.recall-close{position:absolute;top:10px;right:12px;width:32px;height:32px;border:0;border-radius:50%;background:#F2F2F7;color:#555;font-size:24px;line-height:30px;text-align:center;cursor:pointer;padding:0}
+.recall-close:hover{background:#e8e8ed;color:#111}
+
 </style>
 </head>
 <body>
@@ -147,7 +151,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 
 <div id="englishModal" class="modal"><div class="modal-content"><h2 id="englishModalTitle">📖 记录英语错误</h2><label class="muted">① 错误类型：</label><select id="errType"><option>选项辨析</option><option>细节定位</option><option>词义/熟词僻义</option><option>长难句理解</option><option>逻辑判断</option><option>粗心/误读</option><option>其他</option></select><label class="muted">② 为什么错？</label><textarea id="errReason" rows="3"></textarea><label class="muted">③ 下次提醒：</label><input id="errTip"><div style="display:flex;gap:10px"><button class="btn" onclick="saveEnglishError()">保存</button><button class="btn btn-secondary" onclick="closeEnglishModal()">取消</button></div></div></div>
 
-<div id="recallModal" class="modal recall-lock"><div class="modal-content"><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
+<div id="recallModal" class="modal recall-lock"><div class="modal-content" style="position:relative"><button class="recall-close" aria-label="退出五题回忆检测" onclick="closeRecall()">×</button><h2>🧠 五题回忆检测</h2><div id="recallProgress" class="recall-progress"></div><div id="recallBody"></div></div></div>
 <div id="vulnModal" class="modal"><div class="modal-content"><h2 id="vulnModalTitle">🧠 记个未完全掌握的细节点</h2><label class="muted">细节点描述：</label><textarea id="vulnDesc" rows="4"></textarea><div style="display:flex;gap:10px"><button class="btn" onclick="saveVulnerability()">保存</button><button class="btn btn-secondary" onclick="closeVulnerabilityModal()">取消</button></div></div></div>
 
 <div id="authModal" class="modal" onclick="if(event.target===this)closeAuthModal()"><div class="modal-content">
@@ -408,6 +412,7 @@ document.addEventListener('keydown',function(e){
     closeSideMenu();
   }
 });
+function closeRecall(){document.getElementById('recallModal').classList.remove('active');recallState={taskId:null,index:0,scores:[]};}
 function startRecall(id){let t=tasks.find(x=>x.id===id);if(!t)return;recallState={taskId:id,index:0,scores:Array.isArray(t.recall)?[...t.recall]:[]};if(recallState.scores.length!==5)recallState.scores=[null,null,null,null,null];document.getElementById('recallModal').classList.add('active');renderRecallQuestion()}
 function renderRecallQuestion(){let i=recallState.index,score=recallState.scores[i],labels=['完全不会','较差','一般','较好','非常熟练'];document.getElementById('recallProgress').textContent=`第 ${i+1} / 5 题 · 请先合上书，再判断自己的真实掌握程度`;document.getElementById('recallBody').innerHTML=`<div class="recall-question"><b>${i+1}️⃣ ${recallQuestions[i]}</b><div class="recall-options">${labels.map((x,n)=>`<button class="recall-opt ${score===n+1?'selected':''}" onclick="setRecallScore(${n+1})">${n+1}<br>${x}</button>`).join('')}</div></div><div class="recall-nav"><button class="btn btn-secondary" onclick="prevRecall()" ${i===0?'disabled':''}>上一题</button>${i<4?'<button class="btn" onclick="nextRecall()">下一题</button>':'<button class="btn" onclick="finishRecall()">生成熟悉度</button>'}</div>`}
 function setRecallScore(n){recallState.scores[recallState.index]=n;renderRecallQuestion()}
