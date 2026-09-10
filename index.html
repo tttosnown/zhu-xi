@@ -111,9 +111,17 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 .recall-close{position:absolute;top:10px;right:12px;width:32px;height:32px;border:0;border-radius:50%;background:#F2F2F7;color:#555;font-size:24px;line-height:30px;text-align:center;cursor:pointer;padding:0}
 .recall-close:hover{background:#e8e8ed;color:#111}
 
+
+/* 启动封面：保持简洁白底，约 0.9 秒后进入筑习 */
+#startupSplash{position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;opacity:1;visibility:visible;transition:opacity .25s ease,visibility .25s ease}
+#startupSplash.hide{opacity:0;visibility:hidden;pointer-events:none}
+#startupSplashInner{display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateY(-2vh)}
+#startupSplash img{width:92px;height:92px;object-fit:contain;border-radius:22px;margin-bottom:16px}
+#startupSplashName{font-size:22px;letter-spacing:1.5px;color:#111;font-weight:500}
 </style>
 </head>
 <body>
+<div id="startupSplash" aria-label="zhuxi 启动封面"><div id="startupSplashInner"><img src="./icon-180.png" alt="筑习"><div id="startupSplashName">zhuxi</div></div></div>
 <header><h1><span>筑习 <span style="font-size:12px;color:var(--sub);font-weight:normal">3.0</span></span><span class="header-actions"><button class="btn btn-small btn-secondary menu-trigger" aria-label="打开菜单" onclick="toggleSideMenu()">⋯</button></span></h1></header>
 
 <div id="sideMenuOverlay" class="side-menu-overlay" onclick="if(event.target===this)closeSideMenu()">
@@ -186,7 +194,7 @@ const KEY='zhuxi_v1_2_';
 function localDateString(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
 let todayStr=localDateString();
 let selectedDate=todayStr;
-let weekCursor=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+let weekCursor=getMonday(todayStr);
 const subjects=["建筑史","建筑理论","建筑物理","构造技术","英语","政治"];
 function getData(k,d){try{const v=localStorage.getItem(KEY+k);return v?JSON.parse(v):d}catch(e){return d}}
 
@@ -237,7 +245,7 @@ let localMode=true;
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');if(id==='dashboard')renderDashboard();if(id==='tree')renderTree();if(id==='norms'){loadDailyCodeQuestion();searchNorms();}if(id==='english')renderEnglishErrors();if(id==='vulnerability'){renderVulnerabilities();renderRandom()}if(id==='familiarity')renderFamiliarity();if(id==='settings'){renderWeeklySummary();renderMonthlySummary()}}
 function refreshDateContext(){const now=localDateString();if(now!==todayStr){const old=todayStr;todayStr=now;if(selectedDate===old || !selectedDate)selectedDate=now;weekCursor=getMonday(now)}}
-function startDateWatcher(){setInterval(()=>{const old=todayStr;const now=localDateString();if(now!==old){todayStr=now;if(selectedDate===old)selectedDate=now;weekCursor=new Date(now+'T12:00:00');renderDashboard()}},60000)}
+function startDateWatcher(){setInterval(()=>{const old=todayStr;const now=localDateString();if(now!==old){todayStr=now;if(selectedDate===old)selectedDate=now;weekCursor=getMonday(now);renderDashboard()}},60000)}
 function renderDashboard(){refreshDateContext();renderRoutine();renderMonth();renderDayStatus();renderTasks();renderStudyStats()}
 function renderStudyStats(){
   const el=document.getElementById('studyStats'); if(!el)return;
@@ -535,6 +543,7 @@ function clearAllData(){if(confirm('确定清空所有累计数据吗？此操�
   // 首次启动/升级后立即建立 IndexedDB 快照。
   await writeSnapshotToIDB();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  setTimeout(()=>document.getElementById('startupSplash')?.classList.add('hide'),900);
 })();
 </script>
 
