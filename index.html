@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>筑习 - 建筑考研学习系统 2.1</title>
+<title>筑习 - 建筑考研学习系统 2.2</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#f6f6f3">
 <meta name="mobile-web-app-capable" content="yes">
@@ -128,7 +128,7 @@ nav.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.
 <div class="card"><h2>今日任务清单 <button class="btn btn-small" onclick="openTaskModal()">+ 添加任务</button></h2><div id="taskListContainer"></div></div>
 </section>
 
-<section id="tab-tree" class="tab-content"><div class="card"><h2>🌳 学科思维导图与无限知识树</h2><p class="muted" style="margin-bottom:12px">可修改节点名称、添加子节点或删除分支。</p><div id="treeRootContainer"></div></div></section>
+<section id="tab-tree" class="tab-content"><div class="card"><h2>🌳 学科思维导图与无限知识树</h2><p class="muted" style="margin-bottom:12px">可修改节点名称、添加同级新学科、添加子节点或删除分支。</p><button class="btn btn-small" onclick="addRootNode()" style="margin-bottom:10px">＋ 新增学科</button><div id="treeRootContainer"></div></div></section>
 
 <section id="tab-norms" class="tab-content">
 <div class="card"><h2>🏛️ 每日建筑规范考点抽查</h2><div style="background:#F9F9FB;padding:12px;border-radius:8px;margin-bottom:10px;border:.5px solid var(--line)">
@@ -186,6 +186,7 @@ let subjectTree=getData('tree',{id:1,name:"建筑考研核心知识体系",child
 let englishErrors=getData('english_errors',[]);
 let vulnerabilities=getData('vulnerabilities',[]);
 let moods=getData('moods',{});
+let coffees=getData('coffees',{});
 let familiarityHistory=getData('familiarity_history',[]);
 let codeItems=[],codeBankPromise=null,currentCode=null,normSearchResults=[],editingEnglishId=null,editingVulnId=null;
 let currentUser=null,authMode='login',syncTimer=null;
@@ -228,7 +229,7 @@ async function submitAuth(){
 async function resetPassword(){const email=document.getElementById('authEmail').value.trim();if(!email)return alert('先填写你的邮箱。');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});if(error)return alert('发送失败：'+error.message);alert('重置密码邮件已发送，请查收邮箱。')}
 async function signOut(){await syncToCloud(true);await sb.auth.signOut();currentUser=null;updateAuthUI();closeAuthModal();alert('已退出登录。')}
 function updateAuthUI(){const text=currentUser?'☁ 已登录':'☁ 登录 / 注册';const b=document.getElementById('sideAuthBtn');if(b)b.textContent=text;const hint=document.getElementById('sideAuthHint');if(hint)hint.textContent=currentUser?('已登录：'+(currentUser.email||'当前账号')+' · 学习记录自动同步'):'登录后可在多个设备同步学习记录';}
-function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,familiarityHistory,version:2,updated_at:new Date().toISOString()}}
+function localSnapshot(){return {tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,familiarityHistory,version:2,updated_at:new Date().toISOString()}}
 function mergeArray(local,cloud,key){const map=new Map();(Array.isArray(cloud)?cloud:[]).forEach(x=>map.set(String(x[key]),x));(Array.isArray(local)?local:[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()].sort((a,b)=>String(b.date||b.created_at||b.id||'').localeCompare(String(a.date||a.created_at||a.id||'')))}
 async function syncFromCloud(){
   if(!currentUser)return;
@@ -245,9 +246,10 @@ async function syncFromCloud(){
     englishErrors=mergeArray(local.englishErrors,cloud.englishErrors,'id');
     vulnerabilities=mergeArray(local.vulnerabilities,cloud.vulnerabilities,'id');
     moods={...(local.moods||{}),...(cloud.moods||{})};
+    coffees={...(local.coffees||{}),...(cloud.coffees||{})};
     familiarityHistory=mergeArray(local.familiarityHistory,cloud.familiarityHistory,'id');
     if(cloud.subjectTree&&JSON.stringify(cloud.subjectTree)!==JSON.stringify(local.subjectTree)) subjectTree=cloud.subjectTree;
-    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);saveData('familiarity_history',familiarityHistory);
+    saveData('tasks',tasks);saveData('tree',subjectTree);saveData('english_errors',englishErrors);saveData('vulnerabilities',vulnerabilities);saveData('moods',moods);saveData('coffees',coffees);saveData('familiarity_history',familiarityHistory);
     renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();
     await syncToCloud(true);
   }
@@ -364,8 +366,8 @@ function renderMonth(){
   let first=new Date(y,mo,1).getDay(),off=first===0?6:first-1,days=new Date(y,mo+1,0).getDate(),h='';
   for(let i=0;i<off;i++)h+='<div class="month-cell" style="opacity:.3"></div>';
   for(let d=1;d<=days;d++){
-    let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds),mood=moods[ds];
-    h+=`<div class="month-cell ${mood?'has-mood':''}" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div><div class="month-mood">${mood?moodFace(mood,true):''}</div></div>`
+    let ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ts=tasks.filter(t=>t.date===ds),mood=moods[ds],coffee=coffees[ds];
+    h+=`<div class="month-cell ${mood||coffee?'has-mood':''}" onclick="openDay('${ds}')"><b>${d}</b><div>${ts.map(t=>`<i class="dot dot-${esc(t.subject)}" style="display:inline-block;width:5px;height:5px;margin:1px"></i>`).join('')}</div><div class="month-mood">${mood?moodFace(mood,true):''}${coffee?'<span style="font-size:15px;margin-left:2px">☕</span>':''}</div></div>`
   }
   c.innerHTML=h
 }
@@ -374,8 +376,9 @@ function taskForm(t){return `<input id="newTaskTitle" placeholder="任务名称"
 function saveEditedTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;let title=document.getElementById('newTaskTitle').value.trim();if(!title)return alert('请输入任务名称');t.title=title;t.subject=document.getElementById('newTaskSubject').value;t.difficulty=+document.getElementById('newTaskDifficulty').value||3;t.date=document.getElementById('newTaskDate').value||todayStr;saveData('tasks',tasks);closeModal();renderDashboard()}
 function deleteTask(id){if(!confirm('确认删除这个学习任务吗？'))return;tasks=tasks.filter(x=>x.id!==id);saveData('tasks',tasks);renderDashboard()}
 function toggleTask(id){tasks=tasks.map(t=>t.id===id?{...t,completed:!t.completed}:t);saveData('tasks',tasks);renderDashboard()}
+function coffeeSummary(c){if(!c)return '';let t=c.type==='custom'?(c.customType||'自定义'):c.type;return `已记录：☕ ${esc(t)} · ${c.count||1} 杯${c.time?' · '+esc(c.time):''}`}
 function openDay(ds){
-  let ts=tasks.filter(t=>t.date===ds),current=moods[ds]||'';
+  let ts=tasks.filter(t=>t.date===ds),current=moods[ds]||'',coffee=coffees[ds]||null;
   document.getElementById('genericTitle').textContent='📅 '+ds;
   document.getElementById('genericBody').innerHTML=
     (ts.length?ts.map(t=>`<div class="search-result"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.subject)} · ${t.completed?'已完成':'未完成'} · 熟悉度 ${t.mastery??'—'}%</span></div>`).join(''):'<p class="muted">当天无任务。</p>')+
@@ -384,15 +387,23 @@ function openDay(ds){
       <div class="mood-picker">${MOODS.map(m=>`<button class="mood-option ${current===m.id?'selected':''}" onclick="selectMood('${ds}','${m.id}')">${moodFace(m.id)}<span>${m.name}</span></button>`).join('')}</div>
       <div class="mood-note">${current?'已记录：'+MOODS.find(m=>m.id===current)?.name+' · 点击其他表情即可修改':'还没有记录今天的心情'}</div>
       ${current?`<button class="btn btn-secondary btn-small" style="margin-top:9px;width:100%" onclick="clearMood('${ds}')">清除当天心情</button>`:''}
+    </div>
+    <div style="margin-top:14px;padding-top:12px;border-top:.5px solid var(--line)">
+      <b style="font-size:13px">☕ 今天喝咖啡了吗？</b>
+      <div style="display:flex;gap:8px;margin-top:9px"><button class="btn btn-small ${coffee?'':'btn-secondary'}" onclick="setCoffeeNone('${ds}')">没有</button><button class="btn btn-small ${coffee?'':'btn-secondary'}" onclick="showCoffeeForm('${ds}')">${coffee?'已喝 · 修改':'有'}</button></div>
+      ${coffee?`<div class="mood-note" style="margin-top:8px">${coffeeSummary(coffee)}</div><button class="btn btn-secondary btn-small" style="margin-top:9px;width:100%;color:#FF3B30" onclick="clearCoffee('${ds}')">删除当天咖啡记录</button>`:''}
+      <div id="coffeeForm_${ds}" style="margin-top:10px">${coffee?coffeeFormHTML(ds,coffee):''}</div>
     </div>`;
   document.getElementById('genericModal').classList.add('active')
 }
-function selectMood(ds,id){
-  moods[ds]=id;saveData('moods',moods);saveData('familiarity_history',familiarityHistory);renderMonth();openDay(ds)
-}
-function clearMood(ds){
-  delete moods[ds];saveData('moods',moods);saveData('familiarity_history',familiarityHistory);renderMonth();openDay(ds)
-}
+function coffeeFormHTML(ds,c={}){return `<div style="background:#F9F9FB;padding:10px;border-radius:9px;border:.5px solid var(--line)"><label class="muted">咖啡类型</label><select id="coffeeType_${ds}" onchange="toggleCoffeeCustom('${ds}')"><option ${c.type==='美式'?'selected':''}>美式</option><option ${c.type==='拿铁'?'selected':''}>拿铁</option><option ${c.type==='澳白'?'selected':''}>澳白</option><option ${c.type==='冰咖啡'?'selected':''}>冰咖啡</option><option value="custom" ${c.type==='custom'?'selected':''}>自定义</option></select><input id="coffeeCustom_${ds}" placeholder="输入咖啡名称" value="${esc(c.customType||'')}" style="margin-top:7px;display:${c.type==='custom'?'block':'none'}"><label class="muted" style="display:block;margin-top:8px">杯数</label><select id="coffeeCount_${ds}">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(c.count||1)===n?'selected':''}>${n} 杯</option>`).join('')}</select><label class="muted" style="display:block;margin-top:8px">时间（可不填）</label><select id="coffeeTime_${ds}"><option value="">不记录</option><option ${c.time==='上午'?'selected':''}>上午</option><option ${c.time==='中午'?'selected':''}>中午</option><option ${c.time==='下午'?'selected':''}>下午</option><option ${c.time==='晚上'?'selected':''}>晚上</option></select><button class="btn btn-small" style="margin-top:9px;width:100%" onclick="saveCoffee('${ds}')">保存咖啡记录</button></div>`}
+function showCoffeeForm(ds){let c=coffees[ds]||{};document.getElementById('coffeeForm_'+ds).innerHTML=coffeeFormHTML(ds,c)}
+function toggleCoffeeCustom(ds){let type=document.getElementById('coffeeType_'+ds)?.value,el=document.getElementById('coffeeCustom_'+ds);if(el)el.style.display=type==='custom'?'block':'none'}
+function saveCoffee(ds){let type=document.getElementById('coffeeType_'+ds)?.value||'美式',customType=document.getElementById('coffeeCustom_'+ds)?.value.trim()||'',count=Number(document.getElementById('coffeeCount_'+ds)?.value||1),time=document.getElementById('coffeeTime_'+ds)?.value||'';if(type==='custom'&&!customType)return alert('请输入自定义咖啡名称');coffees[ds]={type,count,time,customType:type==='custom'?customType:''};saveData('coffees',coffees);renderMonth();openDay(ds)}
+function setCoffeeNone(ds){delete coffees[ds];saveData('coffees',coffees);renderMonth();openDay(ds)}
+function clearCoffee(ds){if(!confirm('确认删除当天的咖啡记录吗？'))return;delete coffees[ds];saveData('coffees',coffees);renderMonth();openDay(ds)}
+function selectMood(ds,id){moods[ds]=id;saveData('moods',moods);renderMonth();openDay(ds)}
+function clearMood(ds){delete moods[ds];saveData('moods',moods);renderMonth();openDay(ds)}
 function openTaskModal(){closeAllSwipeRows();document.getElementById('genericTitle').textContent='➕ 添加学习任务';document.getElementById('genericBody').innerHTML=taskForm()+`<button class="btn" onclick="saveNewTask()" style="margin-top:10px">保存任务</button>`;document.getElementById('genericModal').classList.add('active')}
 function saveNewTask(){let title=document.getElementById('newTaskTitle').value.trim();if(!title)return alert('请输入任务名称');tasks.unshift({id:Date.now(),title,subject:document.getElementById('newTaskSubject').value,date:document.getElementById('newTaskDate').value||todayStr,completed:false,difficulty:+document.getElementById('newTaskDifficulty').value||3,mastery:null,recall:[],repeat:false});saveData('tasks',tasks);closeModal();renderDashboard()}
 function closeModal(){document.getElementById('genericModal').classList.remove('active')}
@@ -434,6 +445,7 @@ function treeHTML(n){return `<li class="tree-node"><div class="tree-node-content
 function findNode(n,id){if(n.id===id)return n;for(const c of n.children||[]){let r=findNode(c,id);if(r)return r}return null}
 function renameNode(id,v){let n=findNode(subjectTree,id);if(n){n.name=v;saveData('tree',subjectTree)}}
 function addNode(id){let n=findNode(subjectTree,id);if(n){n.children=n.children||[];n.children.push({id:Date.now(),name:'新建子节点',children:[]});saveData('tree',subjectTree);renderTree()}}
+function addRootNode(){subjectTree.children=subjectTree.children||[];subjectTree.children.push({id:Date.now(),name:'新建学科',children:[]});saveData('tree',subjectTree);renderTree()}
 function deleteNode(id){function rm(n){let i=(n.children||[]).findIndex(x=>x.id===id);if(i>=0){n.children.splice(i,1);return true}return (n.children||[]).some(rm)}rm(subjectTree);saveData('tree',subjectTree);renderTree()}
 
 async function loadCodeBank(){
@@ -518,7 +530,7 @@ function renderMonthlySummary(){
   document.getElementById('monthlySummaryContent').innerHTML=`<div><b>${y}年${mo+1}月</b>：共 ${month.length} 项任务，完成 ${done} 项，完成率 <b>${rate}%</b>，平均掌握度 <b>${avg}%</b>。</div><div style="margin-top:8px;color:var(--sub);font-size:11px">按周观察学习量变化，帮助判断月底是否出现任务堆积或学习强度波动。</div>`;
   document.getElementById('monthlyChart').innerHTML=makeTrendChart(vals,labels,'本月每周任务趋势')
 }
-function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities,moods},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
+function exportDataJSON(){let a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({tasks,subjectTree,englishErrors,vulnerabilities,moods,coffees,familiarityHistory},null,2));a.download='zhuxi_backup.json';document.body.appendChild(a);a.click();a.remove()}
 function clearAllData(){if(confirm('确定清空所有累计数据吗？')){localStorage.clear();location.reload()}}
 
 renderDashboard();renderTree();renderEnglishErrors();renderVulnerabilities();renderRandom();renderFamiliarity();renderWeeklySummary();renderMonthlySummary();loadDailyCodeQuestion();
