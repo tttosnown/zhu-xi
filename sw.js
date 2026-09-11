@@ -1,4 +1,4 @@
-const CACHE='zhuxi-v34-startup-weekfix2';
+const CACHE='zhuxi-v35-focus-week';
 const ASSETS=['./','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./code-bank.json','./code-bank.min.json','./norm-library.json'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
